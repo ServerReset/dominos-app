@@ -80,7 +80,7 @@ fun HomeScreen(
                         Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Search", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.height(8.dp))
-                    OutlinedButton(onClick = {
+                    FilledTonalButton(onClick = {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                             isLocating = true
                             try {
