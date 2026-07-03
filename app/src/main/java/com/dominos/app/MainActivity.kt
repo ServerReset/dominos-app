@@ -58,24 +58,25 @@ fun DominosApp() {
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
+                onGuestContinue = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
                 onLogin = { email, password ->
                     accountViewModel.login(email, password)
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
-                onSkip = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
+                isLoading = false
             )
         }
 
         composable(Screen.Account.route) {
             AccountScreen(
                 state = accountState,
-                onFieldUpdate = { field, value -> accountViewModel.updateField(field, value) },
+                onUpdateField = { field, value -> accountViewModel.updateField(field, value) },
                 onSave = {
                     accountViewModel.saveProfile()
                     navController.popBackStack()
@@ -92,20 +93,15 @@ fun DominosApp() {
 
         composable(Screen.Home.route) {
             HomeScreen(
-                state = storeState,
-                onSearchQueryChange = { storeViewModel.updateSearchQuery(it) },
-                onZipChange = { storeViewModel.updateZipQuery(it) },
-                onSearch = {
+                onSearch = { street, zip ->
                     storeViewModel.searchStores(
-                        storeState.searchQuery.ifBlank { "1 Main St" },
-                        storeState.zipQuery
+                        street.ifBlank { "1 Main St" },
+                        zip
                     )
+                    navController.navigate(Screen.Stores.route)
                 },
                 onCartClick = { navController.navigate(Screen.Cart.route) },
                 onAccountClick = { navController.navigate(Screen.Account.route) },
-                onViewStores = {
-                    navController.navigate(Screen.Stores.route)
-                },
                 cartItemCount = cartItemCount
             )
         }
@@ -113,9 +109,9 @@ fun DominosApp() {
         composable(Screen.Stores.route) {
             StoresScreen(
                 stores = storeState.stores,
-                isLoading = storeState.isLoading,
-                onStoreSelected = { storeId ->
-                    navController.navigate(Screen.Menu.createRoute(storeId))
+                onStoreClick = { store ->
+                    val id = store.storeID ?: return@StoresScreen
+                    navController.navigate(Screen.Menu.createRoute(id))
                 },
                 onBack = { navController.popBackStack() }
             )

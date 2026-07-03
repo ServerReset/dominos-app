@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dominos.app.data.model.*
+import com.dominos.app.data.model.CartItem
 import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 
@@ -38,21 +38,33 @@ fun CustomizeProductScreen(
 
     val isPizza = item.productType == "Pizza" || item.productCode.contains("P") || item.sizes.size > 1
 
-    val selectedVariant = item.variants.find { it.sizeCode == selectedSizeCode && (it.flavorCode == selectedFlavorCode || it.flavorCode == null) }
-    val basePrice = selectedVariant?.price?.toDoubleOrNull() ?: item.price?.removePrefix("$")?.toDoubleOrNull() ?: 0.0
+    val selectedVariant = item.variants.find {
+        it.sizeCode == selectedSizeCode && (it.flavorCode == selectedFlavorCode || it.flavorCode == null)
+    }
+    val basePrice = selectedVariant?.price?.toDoubleOrNull()
+        ?: item.price?.removePrefix("$")?.toDoubleOrNull() ?: 0.0
     val totalPrice = basePrice * quantity
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(item.productName, fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        item.productName,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            @Suppress("DEPRECATION") Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DominosRed,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
@@ -61,7 +73,8 @@ fun CustomizeProductScreen(
         bottomBar = {
             Surface(
                 tonalElevation = 4.dp,
-                shadowElevation = 12.dp
+                shadowElevation = 12.dp,
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Row(
                     modifier = Modifier
@@ -74,7 +87,7 @@ fun CustomizeProductScreen(
                         FilledIconButton(
                             onClick = { if (quantity > 1) quantity-- },
                             modifier = Modifier.size(40.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(14.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -90,9 +103,9 @@ fun CustomizeProductScreen(
                         FilledIconButton(
                             onClick = { quantity++ },
                             modifier = Modifier.size(40.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(14.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = DominosRed,
+                                containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
@@ -104,7 +117,9 @@ fun CustomizeProductScreen(
                             val options = mutableMapOf<String, Map<String, String>>()
                             if (isPizza && selectedSizeCode.isNotEmpty()) {
                                 options["X"] = mapOf("1/1" to "1")
-                                options["C"] = mapOf("1/1" to selectedSizeCode.replace(Regex("[^0-9]"), ""))
+                                options["C"] = mapOf(
+                                    "1/1" to selectedSizeCode.replace(Regex("[^0-9]"), "")
+                                )
                             }
                             selectedToppings.forEach { code ->
                                 options[code] = mapOf("1/1" to "1")
@@ -121,10 +136,15 @@ fun CustomizeProductScreen(
                             )
                             onAddToCart(cartItem, storeId)
                         },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
                     ) {
-                        Text("Add to Cart - \$" + "%.2f".format(totalPrice), fontWeight = FontWeight.Bold)
+                        Text(
+                            "Add to Cart - \$" + "%.2f".format(totalPrice),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
@@ -140,47 +160,59 @@ fun CustomizeProductScreen(
         ) {
             if (isPizza && item.sizes.isNotEmpty()) {
                 item {
-                    SectionHeader("Size")
+                    ExpressiveSectionHeader("Size")
                     Spacer(modifier = Modifier.height(8.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.sizes.forEach { size ->
                             val variant = item.variants.find { it.sizeCode == size.code }
                             val sizePrice = variant?.price?.toDoubleOrNull()
+                            val isSelected = selectedSizeCode == size.code
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = if (selectedSizeCode == size.code)
-                                        DominosRed.copy(alpha = 0.08f)
+                                    containerColor = if (isSelected)
+                                        MaterialTheme.colorScheme.primaryContainer
                                     else MaterialTheme.colorScheme.surface
                                 ),
-                                border = if (selectedSizeCode == size.code)
-                                    CardDefaults.outlinedCardBorder().copy(
-                                        width = 2.dp
-                                    ) else null
+                                border = if (isSelected)
+                                    CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null
                             ) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     RadioButton(
-                                        selected = selectedSizeCode == size.code,
+                                        selected = isSelected,
                                         onClick = { selectedSizeCode = size.code ?: "" },
-                                        colors = RadioButtonDefaults.colors(selectedColor = DominosRed)
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = MaterialTheme.colorScheme.primary
+                                        )
                                     )
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
                                         size.name ?: size.code ?: "",
                                         modifier = Modifier.weight(1f),
-                                        fontWeight = if (selectedSizeCode == size.code) FontWeight.Bold else FontWeight.Normal,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     sizePrice?.let {
-                                        Text(
-                                            "\$${"%.2f".format(it)}",
-                                            fontWeight = FontWeight.Bold,
-                                            color = DominosRed
-                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer
+                                        ) {
+                                            Text(
+                                                "\$${"%.2f".format(it)}",
+                                                modifier = Modifier.padding(
+                                                    horizontal = 12.dp,
+                                                    vertical = 4.dp
+                                                ),
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -195,28 +227,32 @@ fun CustomizeProductScreen(
 
             if (item.flavors.isNotEmpty()) {
                 item {
-                    SectionHeader("Crust")
+                    ExpressiveSectionHeader("Crust")
                     Spacer(modifier = Modifier.height(8.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.flavors.forEach { flavor ->
                             val isSelected = selectedFlavorCode == flavor.code
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = if (isSelected)
-                                        DominosRed.copy(alpha = 0.08f)
+                                        MaterialTheme.colorScheme.primaryContainer
                                     else MaterialTheme.colorScheme.surface
                                 )
                             ) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     RadioButton(
                                         selected = isSelected,
                                         onClick = { selectedFlavorCode = flavor.code },
-                                        colors = RadioButtonDefaults.colors(selectedColor = DominosRed)
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = MaterialTheme.colorScheme.primary
+                                        )
                                     )
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
@@ -226,7 +262,13 @@ fun CustomizeProductScreen(
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     flavor.price?.toDoubleOrNull()?.let {
-                                        if (it > 0) Text("+\$${"%.2f".format(it)}", color = DominosRed)
+                                        if (it > 0) {
+                                            Text(
+                                                "+\$${"%.2f".format(it)}",
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -238,22 +280,24 @@ fun CustomizeProductScreen(
             if (item.availableToppings.isNotEmpty()) {
                 item { HorizontalDivider() }
                 item {
-                    SectionHeader("Toppings")
+                    ExpressiveSectionHeader("Toppings")
                     Spacer(modifier = Modifier.height(8.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.availableToppings.take(20).forEach { topping ->
                             val isChecked = topping.code in selectedToppings
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(14.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = if (isChecked)
-                                        DominosRed.copy(alpha = 0.05f)
+                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                                 )
                             ) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Checkbox(
@@ -265,7 +309,9 @@ fun CustomizeProductScreen(
                                                 selectedToppings - (topping.code ?: "")
                                             }
                                         },
-                                        colors = CheckboxDefaults.colors(checkedColor = DominosRed)
+                                        colors = CheckboxDefaults.colors(
+                                            checkedColor = MaterialTheme.colorScheme.primary
+                                        )
                                     )
                                     Text(
                                         topping.name ?: topping.code ?: "",
@@ -273,7 +319,13 @@ fun CustomizeProductScreen(
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     topping.price?.toDoubleOrNull()?.let {
-                                        if (it > 0) Text("+\$${"%.2f".format(it)}", color = DominosRed, fontWeight = FontWeight.Medium)
+                                        if (it > 0) {
+                                            Text(
+                                                "+\$${"%.2f".format(it)}",
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -286,11 +338,14 @@ fun CustomizeProductScreen(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        color = DominosRed
-    )
+private fun ExpressiveSectionHeader(text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.weight(1f))
+    }
 }

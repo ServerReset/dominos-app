@@ -1,6 +1,5 @@
 package com.dominos.app.ui.screens
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,14 +35,23 @@ fun CartScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cart", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Cart",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            @Suppress("DEPRECATION") Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DominosRed,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
@@ -53,29 +61,42 @@ fun CartScreen(
             if (items.isNotEmpty()) {
                 Surface(
                     tonalElevation = 4.dp,
-                    shadowElevation = 12.dp
+                    shadowElevation = 12.dp,
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Subtotal", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Subtotal",
+                                style = MaterialTheme.typography.titleMedium
+                            )
                             Text(
                                 "\$${"%.2f".format(subtotal)}",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = DominosRed
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = onCheckout,
-                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
                             shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
                         ) {
-                            Text("Checkout", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Checkout",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -95,7 +116,7 @@ fun CartScreen(
                     Icons.Default.ShoppingCart,
                     contentDescription = null,
                     modifier = Modifier.size(80.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -115,7 +136,9 @@ fun CartScreen(
                 Button(
                     onClick = onContinueShopping,
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
                     Text("Browse Menu", fontWeight = FontWeight.Bold)
                 }
@@ -142,7 +165,7 @@ fun CartScreen(
 }
 
 @Composable
-fun ExpressiveCartItemCard(
+private fun ExpressiveCartItemCard(
     item: CartItem,
     onIncrease: () -> Unit,
     onDecrease: () -> Unit,
@@ -155,7 +178,9 @@ fun ExpressiveCartItemCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -201,12 +226,16 @@ fun ExpressiveCartItemCard(
                     FilledIconButton(
                         onClick = onDecrease,
                         modifier = Modifier.size(36.dp),
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Decrease", modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Remove,
+                            contentDescription = "Decrease",
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                     Text(
                         "${item.quantity}",
@@ -217,25 +246,32 @@ fun ExpressiveCartItemCard(
                     FilledIconButton(
                         onClick = onIncrease,
                         modifier = Modifier.size(36.dp),
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = DominosRed,
+                            containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Increase", modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Increase",
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = DominosRed.copy(alpha = 0.1f)
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
                         "\$${"%.2f".format(lineTotal)}",
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(
+                            horizontal = 14.dp,
+                            vertical = 6.dp
+                        ),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = DominosRed
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }

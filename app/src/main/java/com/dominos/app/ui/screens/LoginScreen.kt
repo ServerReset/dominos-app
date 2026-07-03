@@ -1,17 +1,15 @@
 package com.dominos.app.ui.screens
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,111 +20,143 @@ import com.dominos.app.ui.theme.*
 
 @Composable
 fun LoginScreen(
+    onGuestContinue: () -> Unit,
     onLogin: (String, String) -> Unit,
-    onSkip: () -> Unit
+    isLoading: Boolean
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(DominosRed)
+            .animateContentSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Spacer(modifier = Modifier.height(80.dp))
+
+        Text(
+            text = "Domino's",
+            style = MaterialTheme.typography.displayLarge,
+            fontWeight = FontWeight.ExtraBold,
+            color = DominosWhite
+        )
+
+        Text(
+            text = "Pizza Delivery & Carryout",
+            style = MaterialTheme.typography.titleLarge,
+            color = DominosWhite.copy(alpha = 0.8f),
+            modifier = Modifier.padding(top = 4.dp)
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = DominosWhite
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            Icon(
-                imageVector = Icons.Default.LocalPizza,
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = DominosWhite
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                "Domino's",
-                style = MaterialTheme.typography.displaySmall,
-                color = DominosWhite,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                "Pizza Delivery & Carryout",
-                style = MaterialTheme.typography.bodyLarge,
-                color = DominosWhite.copy(alpha = 0.8f)
-            )
-
-            Spacer(modifier = Modifier.weight(0.5f))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = DominosWhite)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                Text(
+                    text = "Sign In",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = DominosDarkGray
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = DominosRed,
+                        cursorColor = DominosRed
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { onLogin(email, password) }),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = DominosRed,
+                        cursorColor = DominosRed
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { onLogin(email, password) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DominosRed,
+                        contentColor = DominosWhite
+                    ),
+                    enabled = !isLoading
                 ) {
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = DominosWhite,
+                            strokeWidth = 2.dp
                         )
-                    )
-
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
+                    } else {
+                        Text(
+                            "Sign In",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
-                    )
-
-                    Button(
-                        onClick = { onLogin(email, password) },
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = DominosRed),
-                        enabled = email.isNotBlank() && password.isNotBlank()
-                    ) {
-                        Text("Sign In", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-            TextButton(onClick = onSkip) {
-                Text(
-                    "Continue as Guest",
-                    color = DominosWhite,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
+        TextButton(
+            onClick = onGuestContinue,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        ) {
+            Text(
+                "Continue as Guest",
+                style = MaterialTheme.typography.titleMedium,
+                color = DominosWhite,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.data.model.CartItem
 import com.dominos.app.ui.theme.*
-import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.AccountUiState
 import com.dominos.app.viewmodel.OrderUiState
 
@@ -44,14 +43,23 @@ fun CheckoutScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Checkout", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Checkout",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            @Suppress("DEPRECATION") Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DominosRed,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
@@ -71,23 +79,36 @@ fun CheckoutScreen(
                         Icons.Default.CheckCircle,
                         contentDescription = null,
                         modifier = Modifier.size(80.dp),
-                        tint = DominosGreen
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Order Placed!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Order Placed!",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                     orderState.estimatedWait?.let {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Estimated wait: $it", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Estimated wait: $it",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                     orderState.pulseOrderGuid?.let {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Order #$it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "Order #$it",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = { onViewTracking(orderState.pulseOrderGuid ?: "") },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
                     ) {
                         Text("Track Order", fontWeight = FontWeight.Bold)
                     }
@@ -102,47 +123,62 @@ fun CheckoutScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ExpressiveSection("Service Method") {
+                ExpressiveSectionCard("Service Method") {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         listOf("Delivery", "Carryout", "DriveUpCarryout").forEach { method ->
+                            val isSelected = orderState.serviceMethod == method
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = if (orderState.serviceMethod == method)
-                                        DominosRed.copy(alpha = 0.08f)
+                                    containerColor = if (isSelected)
+                                        MaterialTheme.colorScheme.primaryContainer
                                     else MaterialTheme.colorScheme.surface
                                 ),
-                                border = if (orderState.serviceMethod == method)
+                                border = if (isSelected)
                                     CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null
                             ) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     RadioButton(
-                                        selected = orderState.serviceMethod == method,
+                                        selected = isSelected,
                                         onClick = { onServiceMethodChange(method) },
-                                        colors = RadioButtonDefaults.colors(selectedColor = DominosRed)
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = MaterialTheme.colorScheme.primary
+                                        )
                                     )
                                     Spacer(modifier = Modifier.width(12.dp))
-                                    Text(method, fontWeight = if (orderState.serviceMethod == method) FontWeight.Bold else FontWeight.Normal)
+                                    Text(
+                                        method,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
                             }
                         }
                     }
                 }
 
-                ExpressiveSection("Customer Information") {
+                ExpressiveSectionCard("Customer Information") {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             OutlinedTextField(
                                 value = accountState.firstName,
                                 onValueChange = { onUpdateField("firstName", it) },
                                 label = { Text("First Name") },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(14.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
                             )
                             OutlinedTextField(
                                 value = accountState.lastName,
@@ -150,47 +186,61 @@ fun CheckoutScreen(
                                 label = { Text("Last Name") },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(14.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
                             )
                         }
-
                         OutlinedTextField(
                             value = accountState.phone,
                             onValueChange = { onUpdateField("phone", it) },
                             label = { Text("Phone") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                            shape = RoundedCornerShape(14.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                            )
                         )
-
                         OutlinedTextField(
                             value = accountState.email,
                             onValueChange = { onUpdateField("email", it) },
                             label = { Text("Email") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                            shape = RoundedCornerShape(14.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                            )
                         )
-
                         OutlinedTextField(
                             value = accountState.street,
                             onValueChange = { onUpdateField("street", it) },
                             label = { Text("Street Address") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                            )
                         )
-
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             OutlinedTextField(
                                 value = accountState.city,
                                 onValueChange = { onUpdateField("city", it) },
                                 label = { Text("City") },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(14.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
                             )
                             OutlinedTextField(
                                 value = accountState.region,
@@ -198,7 +248,10 @@ fun CheckoutScreen(
                                 label = { Text("State") },
                                 modifier = Modifier.width(80.dp),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(14.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
                             )
                             OutlinedTextField(
                                 value = accountState.postalCode,
@@ -206,62 +259,114 @@ fun CheckoutScreen(
                                 label = { Text("ZIP") },
                                 modifier = Modifier.width(100.dp),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(14.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
                             )
                         }
                     }
                 }
 
-                ExpressiveSection("Order Summary") {
+                ExpressiveSectionCard("Order Summary") {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         cartItems.forEach { item ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("${item.quantity}x ${item.productName}", modifier = Modifier.weight(1f))
+                                Text(
+                                    "${item.quantity}x ${item.productName}",
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                                 val lineTotal = (item.price?.toDoubleOrNull() ?: 0.0) * item.quantity
-                                Text("\$${"%.2f".format(lineTotal)}", fontWeight = FontWeight.Medium)
+                                Text(
+                                    "\$${"%.2f".format(lineTotal)}",
+                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                         HorizontalDivider()
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Subtotal", fontWeight = FontWeight.Bold)
-                            Text("\$${"%.2f".format(subtotal)}", fontWeight = FontWeight.Bold, color = DominosRed)
+                            Text(
+                                "Subtotal",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                "\$${"%.2f".format(subtotal)}",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Tax & Fees", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Calculated at store", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                            Text(
+                                "Tax & Fees",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Text(
+                                "Calculated at store",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
 
                 orderState.error?.let {
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text(
-                            it,
+                        Row(
                             modifier = Modifier.padding(16.dp),
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontSize = 14.sp
-                        )
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                it,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
 
                 Button(
                     onClick = onPlaceOrder,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DominosRed),
-                    enabled = !orderState.isLoading && accountState.firstName.isNotBlank() && accountState.street.isNotBlank() && cartItems.isNotEmpty()
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    enabled = !orderState.isLoading &&
+                            accountState.firstName.isNotBlank() &&
+                            accountState.street.isNotBlank() &&
+                            cartItems.isNotEmpty()
                 ) {
                     if (orderState.isLoading) {
                         CircularProgressIndicator(
@@ -270,7 +375,11 @@ fun CheckoutScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Place Order", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "Place Order",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -281,20 +390,24 @@ fun CheckoutScreen(
 }
 
 @Composable
-private fun ExpressiveSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+private fun ExpressiveSectionCard(title: String, content: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = DominosRed
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
             content()
         }

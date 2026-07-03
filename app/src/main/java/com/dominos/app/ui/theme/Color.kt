@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 val DominosRed = Color(0xFFE31837)
 val DominosRedDark = Color(0xFFCC1020)
 val DominosRedLight = Color(0xFFFF4D5E)
+val DominosRedContainer = Color(0xFFFFE6E8)
 val DominosBlue = Color(0xFF0078AE)
 val DominosDarkBlue = Color(0xFF005580)
 val DominosGreen = Color(0xFF68BF3D)

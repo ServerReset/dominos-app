@@ -1,5 +1,6 @@
 package com.dominos.app.ui.screens
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.ui.theme.*
-import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 import com.dominos.app.viewmodel.MenuUiState
 
@@ -30,34 +30,44 @@ fun MenuScreen(
     onBack: () -> Unit,
     cartItemCount: Int
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
         topBar = {
             MediumTopAppBar(
-                title = { Text("Menu", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Menu",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            @Suppress("DEPRECATION") Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 actions = {
                     BadgedBox(
                         badge = {
                             if (cartItemCount > 0) {
-                                Badge(containerColor = MaterialTheme.colorScheme.onPrimary) {
-                                    Text("$cartItemCount")
-                                }
+                                Badge { Text("$cartItemCount") }
                             }
                         }
                     ) {
                         IconButton(onClick = onCartClick) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
+                            Icon(
+                                Icons.Default.ShoppingCart,
+                                contentDescription = "Cart"
+                            )
                         }
                     }
                 },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = DominosRed,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
@@ -72,12 +82,45 @@ fun MenuScreen(
                 .padding(padding)
         ) {
             if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = DominosRed)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 4.dp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            "Loading menu...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else if (state.error != null) {
-                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text(state.error, color = MaterialTheme.colorScheme.error)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            state.error,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             } else {
                 LazyRow(
@@ -85,20 +128,21 @@ fun MenuScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     itemsIndexed(state.flatCategories) { index, category ->
+                        val isSelected = index == state.selectedCategoryIndex
                         FilterChip(
-                            selected = index == state.selectedCategoryIndex,
+                            selected = isSelected,
                             onClick = { onCategorySelected(index) },
                             label = {
                                 Text(
                                     category.name ?: "Category",
                                     maxLines = 1,
                                     fontSize = 13.sp,
-                                    fontWeight = if (index == state.selectedCategoryIndex) FontWeight.Bold else FontWeight.Normal
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
                             },
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = DominosRed,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                             )
                         )
@@ -108,7 +152,10 @@ fun MenuScreen(
                 HorizontalDivider(thickness = 0.5.dp)
 
                 if (state.selectedCategoryProducts.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 Icons.Default.Restaurant,
@@ -117,7 +164,12 @@ fun MenuScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("No items in this category", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "No items in this category",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 } else {
@@ -125,7 +177,10 @@ fun MenuScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        itemsIndexed(state.selectedCategoryProducts, key = { _, item -> item.productCode }) { _, item ->
+                        itemsIndexed(
+                            state.selectedCategoryProducts,
+                            key = { _, item -> item.productCode }
+                        ) { _, item ->
                             ExpressiveProductCard(
                                 item = item,
                                 onClick = { onProductClick(item.productCode) }
@@ -139,13 +194,15 @@ fun MenuScreen(
 }
 
 @Composable
-fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit) {
+private fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -171,30 +228,28 @@ fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit) {
                         )
                     }
                 }
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = DominosRed.copy(alpha = 0.1f)
-                ) {
-                    item.price?.let {
+                item.price?.let {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
                         Text(
                             it,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = DominosRed
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
             }
-
             if (item.sizes.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     item.sizes.take(4).forEach { size ->
                         Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = DominosGray
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
                                 size.name ?: "",
@@ -210,7 +265,9 @@ fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit) {
                         Icons.Default.ChevronRight,
                         contentDescription = "Customize",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp).align(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.CenterVertically)
                     )
                 }
             }

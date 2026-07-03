@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.sp
 private val ExpressiveLightColors = lightColorScheme(
     primary = DominosRed,
     onPrimary = DominosWhite,
-    primaryContainer = DominosRed.copy(alpha = 0.12f),
+    primaryContainer = DominosRedContainer,
     onPrimaryContainer = DominosRedDark,
     secondary = DominosBlue,
     onSecondary = DominosWhite,
@@ -33,7 +33,10 @@ private val ExpressiveLightColors = lightColorScheme(
     error = Color(0xFFBA1A1A),
     onError = DominosWhite,
     errorContainer = Color(0xFFFFDAD6),
-    surfaceTint = DominosRed
+    surfaceTint = DominosRed,
+    inverseSurface = DominosDarkGray,
+    inverseOnSurface = DominosWhite,
+    inversePrimary = DominosRedLight
 )
 
 private val ExpressiveDarkColors = darkColorScheme(
@@ -56,8 +59,8 @@ private val ExpressiveDarkColors = darkColorScheme(
 private val AppShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(14.dp),
+    large = RoundedCornerShape(20.dp),
     extraLarge = RoundedCornerShape(28.dp)
 )
 
