@@ -24,6 +24,11 @@ interface DominosApi {
         @Path("storeID") storeID: String
     ): Response<MenuResponse>
 
+    @GET("store/{storeID}/coupons")
+    suspend fun getCoupons(
+        @Path("storeID") storeID: String
+    ): Response<ResponseBody>
+
     @POST("validate-order")
     suspend fun validateOrder(@Body body: Map<String, OrderPayload>): Response<OrderResponse>
 
@@ -37,5 +42,17 @@ interface DominosApi {
     suspend fun getBraintreeToken(@Body body: Map<String, String>): Response<ResponseBody>
 
     @POST("customer/login")
-    suspend fun login(@Body credentials: Map<String, String>): Response<ResponseBody>
+    suspend fun login1(@Body credentials: Map<String, String>): Response<ResponseBody>
+
+    @POST("login")
+    suspend fun login2(@Body credentials: Map<String, String>): Response<ResponseBody>
+
+    @POST("authenticate")
+    suspend fun login3(@Body credentials: Map<String, String>): Response<ResponseBody>
+
+    @POST("customer/session")
+    suspend fun login4(@Body credentials: Map<String, String>): Response<ResponseBody>
+
+    @GET("customer/profile")
+    suspend fun getProfile(@Header("Cookie") cookie: String = ""): Response<ResponseBody>
 }

@@ -28,7 +28,15 @@ class DominosRepository {
         return runCatching {
             val response = api.getMenu(storeID)
             if (response.isSuccessful && response.body() != null) response.body()!!
-            else throw Exception("Menu fetch failed: ${response.code()} ${response.errorBody()?.string()}")
+            else throw Exception("Menu fetch failed: ${response.code()}")
+        }
+    }
+
+    suspend fun getCoupons(storeID: String): Result<String> {
+        return runCatching {
+            val response = api.getCoupons(storeID)
+            if (response.isSuccessful) response.body()?.string() ?: ""
+            else throw Exception("Coupons failed: ${response.code()}")
         }
     }
 
@@ -58,9 +66,17 @@ class DominosRepository {
 
     suspend fun login(email: String, password: String): Result<Boolean> {
         return runCatching {
-            val response = api.login(mapOf("Email" to email, "Password" to password))
-            if (response.isSuccessful) true
-            else throw Exception("Login failed: ${response.code()} ${response.errorBody()?.string()}")
+            val response = api.login1(mapOf("Email" to email, "Password" to password))
+            if (response.isSuccessful) return@runCatching true
+            val r2 = api.login1(mapOf("email" to email, "password" to password, "rememberMe" to "false"))
+            if (r2.isSuccessful) return@runCatching true
+            val r3 = api.login2(mapOf("email" to email, "password" to password))
+            if (r3.isSuccessful) return@runCatching true
+            val r4 = api.login3(mapOf("Email" to email, "Password" to password, "RememberMe" to "false"))
+            if (r4.isSuccessful) return@runCatching true
+            val r5 = api.login4(mapOf("username" to email, "password" to password))
+            if (r5.isSuccessful) return@runCatching true
+            throw Exception("All auth endpoints returned errors (${response.code()}, ${r2.code()}, ${r3.code()}, ${r4.code()}, ${r5.code()})")
         }
     }
 
