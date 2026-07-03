@@ -65,12 +65,19 @@ fun DominosApp(
 
     NavHost(
         navController = navController,
-        startDestination = if (accountState.isLoggedIn) Screen.Home.route else Screen.Login.route,
+        startDestination = Screen.Splash.route,
         enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut() },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn() },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
     ) {
+        composable(Screen.Splash.route) {
+            SplashScreen(onSplashFinished = {
+                val dest = if (accountState.isLoggedIn) Screen.Home.route else Screen.Login.route
+                navController.navigate(dest) { popUpTo(Screen.Splash.route) { inclusive = true } }
+            })
+        }
+
         composable(Screen.Login.route) {
             LoginScreen(
                 onGuestContinue = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
