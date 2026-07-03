@@ -36,6 +36,6 @@ interface DominosApi {
     @POST("paymentGatewayService/braintree/token")
     suspend fun getBraintreeToken(@Body body: Map<String, String>): Response<ResponseBody>
 
-    @POST("login")
+    @POST("customer/login")
     suspend fun login(@Body credentials: Map<String, String>): Response<ResponseBody>
 }

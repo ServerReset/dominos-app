@@ -58,9 +58,9 @@ class DominosRepository {
 
     suspend fun login(email: String, password: String): Result<Boolean> {
         return runCatching {
-            val response = api.login(mapOf("email" to email, "password" to password))
+            val response = api.login(mapOf("Email" to email, "Password" to password))
             if (response.isSuccessful) true
-            else throw Exception("Login failed: ${response.code()}")
+            else throw Exception("Login failed: ${response.code()} ${response.errorBody()?.string()}")
         }
     }
 
