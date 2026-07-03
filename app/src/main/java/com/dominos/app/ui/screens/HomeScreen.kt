@@ -127,9 +127,11 @@ fun HomeScreen(
                         Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(28.dp))
                         Spacer(Modifier.width(12.dp))
                         Column {
-                            Text("$recentOrderCount recent order${if (recentOrderCount > 1) "s" else ""}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                            Text("Tap Account to view history", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Recent Orders", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                            Text("$recentOrderCount order${if (recentOrderCount > 1) "s" else ""} placed", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
+                        Spacer(Modifier.weight(1f))
+                        FilledTonalButton(onClick = onAccountClick, shape = MaterialTheme.shapes.large) { Text("View", fontWeight = FontWeight.Medium) }
                     }
                 }
             }
