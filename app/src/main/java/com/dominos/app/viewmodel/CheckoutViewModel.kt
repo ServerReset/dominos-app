@@ -58,7 +58,7 @@ class CheckoutViewModel : ViewModel() {
             firstName = customer.firstName.ifBlank { "Guest" },
             lastName = customer.lastName,
             phone = customer.phone.ifBlank { "555-0100" },
-            email = customer.email.ifBlank { "guest@example.com" },
+            email = customer.email.ifBlank { "guest@order.com" },
             address = address,
             products = orderProducts,
             serviceMethod = serviceMethod,
@@ -68,7 +68,7 @@ class CheckoutViewModel : ViewModel() {
             sourceOrganizationURI = "order.dominos.com",
             noCombine = true,
             version = "1.0",
-            metaData = mapOf("placedBy" to "Guest")
+            payments = listOf(PaymentPayload(amount = "0.00", cardType = null, number = null, expiration = null, securityCode = null, postalCode = null, tipAmount = "0.00"))
         )
     }
 

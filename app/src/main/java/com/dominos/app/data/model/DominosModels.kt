@@ -180,6 +180,7 @@ data class OrderProduct(
 )
 
 data class PaymentPayload(
+    @SerializedName("Type") val type: String? = "Cash",
     @SerializedName("Amount") val amount: String? = null,
     @SerializedName("Number") val number: String? = null,
     @SerializedName("CardType") val cardType: String? = null,
