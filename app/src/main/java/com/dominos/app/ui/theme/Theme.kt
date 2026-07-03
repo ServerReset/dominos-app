@@ -22,6 +22,7 @@ private val ExpressiveLightColors = lightColorScheme(
     tertiary = DominosGreen,
     onTertiary = DominosWhite,
     tertiaryContainer = DominosGreen.copy(alpha = 0.12f),
+    onTertiaryContainer = DominosGreen.copy(alpha = 0.8f),
     background = DominosCream,
     onBackground = DominosDarkGray,
     surface = DominosWhite,
@@ -54,9 +55,11 @@ private val ExpressiveDarkColors = darkColorScheme(
     secondary = DominosBlue.copy(alpha = 0.8f),
     onSecondary = DominosWhite,
     secondaryContainer = DominosDarkBlue,
+    onSecondaryContainer = DominosBlue.copy(alpha = 0.6f),
     tertiary = DominosGreen,
     onTertiary = DominosWhite,
     tertiaryContainer = DominosGreen.copy(alpha = 0.15f),
+    onTertiaryContainer = DominosGreen.copy(alpha = 0.8f),
     background = DarkSurfaceDim,
     onBackground = DominosWhite,
     surface = DarkSurface,
@@ -75,13 +78,14 @@ private val ExpressiveDarkColors = darkColorScheme(
     error = Color(0xFFFFB4AB),
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
     surfaceTint = DominosRedDarkMode,
     inverseSurface = DominosWhite,
     inverseOnSurface = DominosDarkGray,
     inversePrimary = DominosRed
 )
 
-private val AppShapes = Shapes(
+val AppShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
     medium = RoundedCornerShape(14.dp),
@@ -89,7 +93,7 @@ private val AppShapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp)
 )
 
-private val AppTypography = Typography(
+val AppTypography = Typography(
     displayLarge = TextStyle(fontWeight = FontWeight.Bold, fontSize = 57.sp, lineHeight = 64.sp, letterSpacing = (-0.25).sp),
     displayMedium = TextStyle(fontWeight = FontWeight.Bold, fontSize = 45.sp, lineHeight = 52.sp),
     displaySmall = TextStyle(fontWeight = FontWeight.Bold, fontSize = 36.sp, lineHeight = 44.sp),
