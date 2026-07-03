@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
@@ -23,6 +24,7 @@ import com.dominos.app.ui.components.DominosProductImage
 import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 import com.dominos.app.viewmodel.MenuUiState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +82,7 @@ fun MenuScreen(
                     }
                 }
             } else {
+                PullToRefreshBox(isRefreshing = state.isLoading, onRefresh = onRetry) {
                 LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     itemsIndexed(state.flatCategories) { index, category ->
                         val isSelected = index == state.selectedCategoryIndex
@@ -104,6 +107,7 @@ fun MenuScreen(
                 }
             }
         }
+    }
     }
 }
 
