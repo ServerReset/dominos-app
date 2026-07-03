@@ -1,42 +1,163 @@
 package com.dominos.app.ui.theme
 
-import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-private val LightColors = lightColorScheme(
+private val ExpressiveLightColors = lightColorScheme(
     primary = DominosRed,
     onPrimary = DominosWhite,
     primaryContainer = DominosRed.copy(alpha = 0.12f),
+    onPrimaryContainer = DominosRedDark,
     secondary = DominosBlue,
     onSecondary = DominosWhite,
+    secondaryContainer = DominosBlue.copy(alpha = 0.12f),
+    onSecondaryContainer = DominosDarkBlue,
     tertiary = DominosGreen,
-    background = DominosWhite,
-    surface = DominosWhite,
-    surfaceVariant = DominosGray,
+    onTertiary = DominosWhite,
+    tertiaryContainer = DominosGreen.copy(alpha = 0.12f),
+    background = DominosCream,
     onBackground = DominosDarkGray,
+    surface = DominosWhite,
     onSurface = DominosDarkGray,
-    outline = DominosLightGray
+    surfaceVariant = DominosGray,
+    onSurfaceVariant = DominosMediumGray,
+    outline = DominosLightGray,
+    outlineVariant = DominosLightGray.copy(alpha = 0.5f),
+    error = Color(0xFFBA1A1A),
+    onError = DominosWhite,
+    errorContainer = Color(0xFFFFDAD6),
+    surfaceTint = DominosRed
+)
+
+private val ExpressiveDarkColors = darkColorScheme(
+    primary = DominosRedLight,
+    onPrimary = DominosDarkGray,
+    primaryContainer = DominosRedDark,
+    onPrimaryContainer = DominosRedLight.copy(alpha = 0.9f),
+    secondary = DominosBlue.copy(alpha = 0.8f),
+    onSecondary = DominosWhite,
+    secondaryContainer = DominosDarkBlue,
+    tertiary = DominosGreen,
+    background = DominosDarkGray,
+    onBackground = DominosWhite,
+    surface = Color(0xFF2C2C2C),
+    onSurface = DominosWhite,
+    surfaceVariant = Color(0xFF3C3C3C),
+    outline = DominosMediumGray
+)
+
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(28.dp)
+)
+
+private val AppTypography = Typography(
+    displayLarge = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 57.sp,
+        lineHeight = 64.sp,
+        letterSpacing = (-0.25).sp
+    ),
+    displayMedium = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 45.sp,
+        lineHeight = 52.sp
+    ),
+    displaySmall = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 36.sp,
+        lineHeight = 44.sp
+    ),
+    headlineLarge = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp
+    ),
+    headlineMedium = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 36.sp
+    ),
+    headlineSmall = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        lineHeight = 32.sp
+    ),
+    titleLarge = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp
+    ),
+    titleMedium = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.15.sp
+    ),
+    titleSmall = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.1.sp
+    ),
+    bodyLarge = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    ),
+    bodyMedium = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.25.sp
+    ),
+    bodySmall = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.4.sp
+    ),
+    labelLarge = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.1.sp
+    ),
+    labelMedium = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
+    ),
+    labelSmall = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
+    )
 )
 
 @Composable
-fun DominosTheme(content: @Composable () -> Unit) {
-    val colorScheme = LightColors
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = DominosRed.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-        }
-    }
+fun DominosTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) ExpressiveDarkColors else ExpressiveLightColors
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

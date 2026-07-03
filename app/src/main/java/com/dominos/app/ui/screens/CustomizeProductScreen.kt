@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.data.model.*
-import com.dominos.app.ui.theme.DominosRed
+import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,11 +45,10 @@ fun CustomizeProductScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(item.productName) },
+                title = { Text(item.productName, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        @Suppress("DEPRECATION")
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -61,8 +60,8 @@ fun CustomizeProductScreen(
         },
         bottomBar = {
             Surface(
-                tonalElevation = 3.dp,
-                shadowElevation = 8.dp
+                tonalElevation = 4.dp,
+                shadowElevation = 12.dp
             ) {
                 Row(
                     modifier = Modifier
@@ -72,11 +71,31 @@ fun CustomizeProductScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { if (quantity > 1) quantity-- }) {
+                        FilledIconButton(
+                            onClick = { if (quantity > 1) quantity-- },
+                            modifier = Modifier.size(40.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
                             Icon(Icons.Default.Remove, contentDescription = "Decrease")
                         }
-                        Text("$quantity", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        IconButton(onClick = { quantity++ }) {
+                        Text(
+                            "$quantity",
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        FilledIconButton(
+                            onClick = { quantity++ },
+                            modifier = Modifier.size(40.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = DominosRed,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
                             Icon(Icons.Default.Add, contentDescription = "Increase")
                         }
                     }
@@ -102,10 +121,10 @@ fun CustomizeProductScreen(
                             )
                             onAddToCart(cartItem, storeId)
                         },
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
                     ) {
-                        Text("Add to Cart - \$${"%.2f".format(totalPrice)}")
+                        Text("Add to Cart - \$" + "%.2f".format(totalPrice), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -115,33 +134,54 @@ fun CustomizeProductScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             if (isPizza && item.sizes.isNotEmpty()) {
                 item {
-                    Text("Size", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    SectionHeader("Size")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.sizes.forEach { size ->
                             val variant = item.variants.find { it.sizeCode == size.code }
                             val sizePrice = variant?.price?.toDoubleOrNull()
-                            Row(
+                            Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (selectedSizeCode == size.code)
+                                        DominosRed.copy(alpha = 0.08f)
+                                    else MaterialTheme.colorScheme.surface
+                                ),
+                                border = if (selectedSizeCode == size.code)
+                                    CardDefaults.outlinedCardBorder().copy(
+                                        width = 2.dp
+                                    ) else null
                             ) {
-                                RadioButton(
-                                    selected = selectedSizeCode == size.code,
-                                    onClick = { selectedSizeCode = size.code ?: "" }
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    size.name ?: size.code ?: "",
-                                    modifier = Modifier.weight(1f),
-                                    fontWeight = if (selectedSizeCode == size.code) FontWeight.Bold else FontWeight.Normal
-                                )
-                                sizePrice?.let {
-                                    Text("\$${"%.2f".format(it)}")
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = selectedSizeCode == size.code,
+                                        onClick = { selectedSizeCode = size.code ?: "" },
+                                        colors = RadioButtonDefaults.colors(selectedColor = DominosRed)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        size.name ?: size.code ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        fontWeight = if (selectedSizeCode == size.code) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    sizePrice?.let {
+                                        Text(
+                                            "\$${"%.2f".format(it)}",
+                                            fontWeight = FontWeight.Bold,
+                                            color = DominosRed
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -155,27 +195,39 @@ fun CustomizeProductScreen(
 
             if (item.flavors.isNotEmpty()) {
                 item {
-                    Text("Crust", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    SectionHeader("Crust")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.flavors.forEach { flavor ->
                             val isSelected = selectedFlavorCode == flavor.code
-                            Row(
+                            Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isSelected)
+                                        DominosRed.copy(alpha = 0.08f)
+                                    else MaterialTheme.colorScheme.surface
+                                )
                             ) {
-                                RadioButton(
-                                    selected = isSelected,
-                                    onClick = { selectedFlavorCode = flavor.code }
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    flavor.name ?: flavor.code ?: "",
-                                    modifier = Modifier.weight(1f),
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                )
-                                flavor.price?.toDoubleOrNull()?.let {
-                                    if (it > 0) Text("+\$${"%.2f".format(it)}")
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = isSelected,
+                                        onClick = { selectedFlavorCode = flavor.code },
+                                        colors = RadioButtonDefaults.colors(selectedColor = DominosRed)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        flavor.name ?: flavor.code ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    flavor.price?.toDoubleOrNull()?.let {
+                                        if (it > 0) Text("+\$${"%.2f".format(it)}", color = DominosRed)
+                                    }
                                 }
                             }
                         }
@@ -186,29 +238,43 @@ fun CustomizeProductScreen(
             if (item.availableToppings.isNotEmpty()) {
                 item { HorizontalDivider() }
                 item {
-                    Text("Toppings", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    SectionHeader("Toppings")
                     Spacer(modifier = Modifier.height(8.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.availableToppings.take(20).forEach { topping ->
                             val isChecked = topping.code in selectedToppings
-                            Row(
+                            Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = isChecked,
-                                    onCheckedChange = { checked ->
-                                        selectedToppings = if (checked) {
-                                            selectedToppings + (topping.code ?: "")
-                                        } else {
-                                            selectedToppings - (topping.code ?: "")
-                                        }
-                                    }
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isChecked)
+                                        DominosRed.copy(alpha = 0.05f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(topping.name ?: topping.code ?: "", modifier = Modifier.weight(1f))
-                                topping.price?.toDoubleOrNull()?.let {
-                                    if (it > 0) Text("+\$${"%.2f".format(it)}")
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Checkbox(
+                                        checked = isChecked,
+                                        onCheckedChange = { checked ->
+                                            selectedToppings = if (checked) {
+                                                selectedToppings + (topping.code ?: "")
+                                            } else {
+                                                selectedToppings - (topping.code ?: "")
+                                            }
+                                        },
+                                        colors = CheckboxDefaults.colors(checkedColor = DominosRed)
+                                    )
+                                    Text(
+                                        topping.name ?: topping.code ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    topping.price?.toDoubleOrNull()?.let {
+                                        if (it > 0) Text("+\$${"%.2f".format(it)}", color = DominosRed, fontWeight = FontWeight.Medium)
+                                    }
                                 }
                             }
                         }
@@ -217,4 +283,14 @@ fun CustomizeProductScreen(
             }
         }
     }
+}
+
+@Composable
+private fun SectionHeader(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = DominosRed
+    )
 }

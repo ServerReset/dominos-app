@@ -15,8 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dominos.app.ui.theme.DominosGray
-import com.dominos.app.ui.theme.DominosRed
+import com.dominos.app.ui.theme.*
+import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 import com.dominos.app.viewmodel.MenuUiState
 
@@ -30,14 +30,15 @@ fun MenuScreen(
     onBack: () -> Unit,
     cartItemCount: Int
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Menu") },
+            MediumTopAppBar(
+                title = { Text("Menu", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        @Suppress("DEPRECATION")
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -55,12 +56,13 @@ fun MenuScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = DominosRed,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                ),
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
@@ -79,7 +81,7 @@ fun MenuScreen(
                 }
             } else {
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     itemsIndexed(state.flatCategories) { index, category ->
@@ -90,9 +92,11 @@ fun MenuScreen(
                                 Text(
                                     category.name ?: "Category",
                                     maxLines = 1,
-                                    fontSize = 14.sp
+                                    fontSize = 13.sp,
+                                    fontWeight = if (index == state.selectedCategoryIndex) FontWeight.Bold else FontWeight.Normal
                                 )
                             },
+                            shape = RoundedCornerShape(12.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = DominosRed,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary
@@ -101,7 +105,7 @@ fun MenuScreen(
                     }
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(thickness = 0.5.dp)
 
                 if (state.selectedCategoryProducts.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -122,7 +126,7 @@ fun MenuScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         itemsIndexed(state.selectedCategoryProducts, key = { _, item -> item.productCode }) { _, item ->
-                            ProductCard(
+                            ExpressiveProductCard(
                                 item = item,
                                 onClick = { onProductClick(item.productCode) }
                             )
@@ -135,70 +139,81 @@ fun MenuScreen(
 }
 
 @Composable
-fun ProductCard(item: MenuDisplayItem, onClick: () -> Unit) {
+fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    item.productName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                item.description?.let {
-                    Spacer(modifier = Modifier.height(4.dp))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        item.productName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
+                    item.description?.let {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
-                item.price?.let {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        "From $it",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = DominosRed
-                    )
-                }
-                if (item.sizes.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        item.sizes.take(4).forEach { size ->
-                            Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = DominosGray
-                            ) {
-                                Text(
-                                    size.name ?: "",
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = DominosRed.copy(alpha = 0.1f)
+                ) {
+                    item.price?.let {
+                        Text(
+                            it,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = DominosRed
+                        )
                     }
                 }
             }
 
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = "Customize",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
+            if (item.sizes.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    item.sizes.take(4).forEach { size ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = DominosGray
+                        ) {
+                            Text(
+                                size.name ?: "",
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = "Customize",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp).align(Alignment.CenterVertically)
+                    )
+                }
+            }
         }
     }
 }

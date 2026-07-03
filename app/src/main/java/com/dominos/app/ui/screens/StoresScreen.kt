@@ -14,11 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dominos.app.data.model.EstimatedWaitMinutes
-import com.dominos.app.data.model.ServiceIsOpen
 import com.dominos.app.data.model.StoreInfo
-import com.dominos.app.ui.theme.DominosGreen
-import com.dominos.app.ui.theme.DominosRed
+import com.dominos.app.ui.theme.*
+import com.dominos.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +32,7 @@ fun StoresScreen(
                 title = { Text("Nearby Stores") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
+                        @Suppress("DEPRECATION")
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -67,10 +66,7 @@ fun StoresScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "No stores found nearby",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    Text("No stores found nearby", style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
                 LazyColumn(
@@ -78,7 +74,7 @@ fun StoresScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(stores) { _, store ->
-                        StoreDetailCard(store = store, onClick = { onStoreSelected(store.storeID ?: "") })
+                        StoreExpressiveCard(store = store, onClick = { onStoreSelected(store.storeID ?: "") })
                     }
                 }
             }
@@ -87,14 +83,15 @@ fun StoresScreen(
 }
 
 @Composable
-fun StoreDetailCard(store: StoreInfo, onClick: () -> Unit) {
+fun StoreExpressiveCard(store: StoreInfo, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,12 +104,12 @@ fun StoreDetailCard(store: StoreInfo, onClick: () -> Unit) {
                 )
                 if (store.isOpen) {
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = DominosGreen.copy(alpha = 0.15f)
+                        shape = RoundedCornerShape(8.dp),
+                        color = DominosGreen.copy(alpha = 0.12f)
                     ) {
                         Text(
                             "OPEN",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             color = DominosGreen,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
@@ -120,12 +117,12 @@ fun StoreDetailCard(store: StoreInfo, onClick: () -> Unit) {
                     }
                 } else {
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(8.dp),
                         color = MaterialTheme.colorScheme.errorContainer
                     ) {
                         Text(
                             "CLOSED",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
@@ -137,66 +134,104 @@ fun StoreDetailCard(store: StoreInfo, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             store.addressDescription?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 store.estimatedWaitMinutes?.let { wait ->
-                    WaitTimeDisplay("Delivery", wait.delivery?.min, wait.delivery?.max)
-                    WaitTimeDisplay("Carryout", wait.carryout?.min, wait.carryout?.max)
-                }
-                store.serviceIsOpen?.let { open ->
-                    if (open.delivery) DeliveryIcon()
-                    if (open.carryout) CarryoutIcon()
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = DominosRed
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            "Delivery ${wait.delivery?.min}-${wait.delivery?.max} min",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.ShoppingBag,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = DominosGreen
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            "Pickup ${wait.carryout?.min}-${wait.carryout?.max} min",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
             store.hoursDescription?.let {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                store.serviceIsOpen?.let { open ->
+                    if (open.delivery == true) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text("Delivery", fontSize = 12.sp) },
+                            leadingIcon = { Icon(Icons.Default.DirectionsCar, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                    if (open.carryout == true) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text("Carryout", fontSize = 12.sp) },
+                            leadingIcon = { Icon(Icons.Default.Storefront, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    "View Menu",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = DominosRed,
+                    fontWeight = FontWeight.Bold
+                )
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = DominosRed,
+                    modifier = Modifier.size(18.dp)
+                )
             }
         }
     }
-}
-
-@Composable
-fun WaitTimeDisplay(label: String, min: Int?, max: Int?) {
-    if (min != null && max != null) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Schedule,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                "${min}-${max} min",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun DeliveryIcon() {
-    Icon(
-        Icons.Default.DirectionsCar,
-        contentDescription = "Delivery",
-        modifier = Modifier.size(16.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-}
-
-@Composable
-fun CarryoutIcon() {
-    Icon(
-        Icons.Default.ShoppingBag,
-        contentDescription = "Carryout",
-        modifier = Modifier.size(16.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
 }

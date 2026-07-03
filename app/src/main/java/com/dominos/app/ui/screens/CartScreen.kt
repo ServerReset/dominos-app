@@ -1,5 +1,6 @@
 package com.dominos.app.ui.screens
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.data.model.CartItem
-import com.dominos.app.ui.theme.DominosRed
+import com.dominos.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,11 +36,10 @@ fun CartScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cart") },
+                title = { Text("Cart", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        @Suppress("DEPRECATION")
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(@Suppress("DEPRECATION") Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -52,10 +52,10 @@ fun CartScreen(
         bottomBar = {
             if (items.isNotEmpty()) {
                 Surface(
-                    tonalElevation = 3.dp,
-                    shadowElevation = 8.dp
+                    tonalElevation = 4.dp,
+                    shadowElevation = 12.dp
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -63,18 +63,19 @@ fun CartScreen(
                             Text("Subtotal", style = MaterialTheme.typography.titleMedium)
                             Text(
                                 "\$${"%.2f".format(subtotal)}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = DominosRed
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = onCheckout,
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
                         ) {
-                            Text("Checkout", fontSize = 16.sp)
+                            Text("Checkout", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -94,13 +95,14 @@ fun CartScreen(
                     Icons.Default.ShoppingCart,
                     contentDescription = null,
                     modifier = Modifier.size(80.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     "Your cart is empty",
                     style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -112,10 +114,10 @@ fun CartScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = onContinueShopping,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = DominosRed)
                 ) {
-                    Text("Browse Menu")
+                    Text("Browse Menu", fontWeight = FontWeight.Bold)
                 }
             }
         } else {
@@ -127,7 +129,7 @@ fun CartScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(items, key = { it.id }) { item ->
-                    CartItemCard(
+                    ExpressiveCartItemCard(
                         item = item,
                         onIncrease = { onUpdateQuantity(item.id, 1) },
                         onDecrease = { onUpdateQuantity(item.id, -1) },
@@ -140,7 +142,7 @@ fun CartScreen(
 }
 
 @Composable
-fun CartItemCard(
+fun ExpressiveCartItemCard(
     item: CartItem,
     onIncrease: () -> Unit,
     onDecrease: () -> Unit,
@@ -151,34 +153,44 @@ fun CartItemCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    item.productName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(18.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        item.productName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    item.flavorCode?.let {
+                        Text(
+                            "Crust: $it",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = onRemove,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "Remove",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
-            item.flavorCode?.let {
-                Text(
-                    "Crust: $it",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -188,35 +200,44 @@ fun CartItemCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     FilledIconButton(
                         onClick = onDecrease,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(36.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Decrease", modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Remove, contentDescription = "Decrease", modifier = Modifier.size(18.dp))
                     }
                     Text(
                         "${item.quantity}",
-                        modifier = Modifier.padding(horizontal = 12.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 18.sp
                     )
                     FilledIconButton(
                         onClick = onIncrease,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(36.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = DominosRed,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Increase", modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Add, contentDescription = "Increase", modifier = Modifier.size(18.dp))
                     }
                 }
-                Text(
-                    "\$${"%.2f".format(lineTotal)}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = DominosRed.copy(alpha = 0.1f)
+                ) {
+                    Text(
+                        "\$${"%.2f".format(lineTotal)}",
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = DominosRed
+                    )
+                }
             }
         }
     }
