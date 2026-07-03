@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -23,10 +22,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.ui.components.DominosProductImage
-import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 import com.dominos.app.viewmodel.MenuUiState
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +40,7 @@ fun MenuScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
-    val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
+    val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 3 } }
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
@@ -58,7 +55,13 @@ fun MenuScreen(
             )
         },
         floatingActionButton = {
-            if (showFab) SmallFloatingActionButton(onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } }) { Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Back to top") }
+            AnimatedVisibility(visible = showFab, enter = scaleIn(), exit = scaleOut()) {
+                SmallFloatingActionButton(
+                    onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) { Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Back to top", tint = MaterialTheme.colorScheme.onPrimaryContainer) }
+            }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -84,41 +87,43 @@ fun MenuScreen(
                     }
                 }
             } else {
-                PullToRefreshBox(isRefreshing = state.isLoading, onRefresh = onRetry) {
-                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    itemsIndexed(state.flatCategories) { index, category ->
-                        val isSelected = index == state.selectedCategoryIndex
-                        FilterChip(selected = isSelected, onClick = { onCategorySelected(index) }, label = { Text(category.name ?: "Category", maxLines = 1, fontSize = 13.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) }, shape = RoundedCornerShape(16.dp), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
-                    }
-                }
-                HorizontalDivider(thickness = 0.5.dp)
-
-                if (filteredProducts.isEmpty()) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(Modifier.height(16.dp)); Text("No items found", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                PullToRefreshBox(isRefreshing = false, onRefresh = onRetry) {
+                    Column {
+                        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            itemsIndexed(state.flatCategories) { index, category ->
+                                val isSelected = index == state.selectedCategoryIndex
+                                FilterChip(selected = isSelected, onClick = { onCategorySelected(index) }, label = { Text(category.name ?: "Category", maxLines = 1, fontSize = 13.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) }, shape = RoundedCornerShape(16.dp), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
+                            }
                         }
-                    }
-                } else {
-                    LazyColumn(state = listState, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        itemsIndexed(filteredProducts, key = { _, item -> item.productCode }) { _, item ->
-                            ExpressiveProductCard(item = item, onClick = { onProductClick(item.productCode) }, isFavorite = isFavorite(item.productCode), onToggleFavorite = { onToggleFavorite(item.productCode, item.productName) })
+                        HorizontalDivider(thickness = 0.5.dp)
+
+                        if (filteredProducts.isEmpty()) {
+                            Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Spacer(Modifier.height(16.dp)); Text("No items found", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        } else {
+                            LazyColumn(state = listState, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                itemsIndexed(filteredProducts, key = { _, item -> item.productCode }) { _, item ->
+                                        ExpressiveProductCard(item = item, onClick = { onProductClick(item.productCode) }, isFavorite = isFavorite(item.productCode), onToggleFavorite = { onToggleFavorite(item.productCode, item.productName) })
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
-    }
 }
 
 @Composable
 private fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit, isFavorite: Boolean = false, onToggleFavorite: () -> Unit = {}) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             DominosProductImage(productCode = item.imageCode ?: item.productCode, modifier = Modifier.size(72.dp))
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(item.productName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 item.description?.let { Spacer(Modifier.height(4.dp)); Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis) }

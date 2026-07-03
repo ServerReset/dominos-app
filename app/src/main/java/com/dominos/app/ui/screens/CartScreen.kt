@@ -1,6 +1,7 @@
 package com.dominos.app.ui.screens
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.data.model.CartItem
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +33,6 @@ fun CartScreen(
     onClearCart: () -> Unit = {}
 ) {
     val subtotal = items.fold(0.0) { acc, item -> acc + ((item.price?.toDoubleOrNull() ?: 0.0) * item.quantity) }
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -41,14 +40,20 @@ fun CartScreen(
                 title = { Text("Cart", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
                 actions = {
-                    if (items.isNotEmpty()) IconButton(onClick = onClearCart) { Icon(Icons.Default.DeleteSweep, contentDescription = "Clear cart") }
+                    AnimatedVisibility(visible = items.isNotEmpty()) {
+                        IconButton(onClick = onClearCart) { Icon(Icons.Default.DeleteSweep, contentDescription = "Clear cart") }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface, actionIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         bottomBar = {
-            if (items.isNotEmpty()) {
-                Surface(tonalElevation = 4.dp, shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surface) {
+            AnimatedVisibility(
+                visible = items.isNotEmpty(),
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut()
+            ) {
+                Surface(tonalElevation = 3.dp, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
                     Column(Modifier.padding(20.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Text("Subtotal", style = MaterialTheme.typography.titleMedium)
@@ -63,27 +68,27 @@ fun CartScreen(
             }
         }
     ) { padding ->
-        if (items.isEmpty()) {
-            Column(Modifier.fillMaxSize().padding(padding).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Icon(Icons.Default.ShoppingCart, contentDescription = null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(16.dp)); Text("Your cart is empty", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp)); Text("Add items from the menu to get started", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(24.dp))
-                Button(onClick = onContinueShopping, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Browse Menu", fontWeight = FontWeight.Bold) }
-            }
-        } else {
-            LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(items, key = { it.id }) { item ->
-                    val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = { dismissValue ->
-                        if (dismissValue == SwipeToDismissBoxValue.EndToStart) { onRemoveItem(item.id); true } else false
-                    })
-                    SwipeToDismissBox(state = dismissState, backgroundContent = {
-                        val color by animateColorAsState(targetValue = if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) MaterialTheme.colorScheme.error else Color.Transparent, label = "swipe_color")
-                        Box(Modifier.fillMaxSize().background(color, RoundedCornerShape(20.dp)).padding(horizontal = 20.dp), contentAlignment = Alignment.CenterEnd) {
-                            if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onError, modifier = Modifier.size(24.dp))
+        Crossfade(targetState = items.isEmpty()) { empty ->
+            if (empty) {
+                Column(Modifier.fillMaxSize().padding(padding).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Icon(Icons.Default.ShoppingCart, contentDescription = null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(16.dp)); Text("Your cart is empty", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp)); Text("Add items from the menu to get started", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(24.dp))
+                    Button(onClick = onContinueShopping, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Browse Menu", fontWeight = FontWeight.Bold) }
+                }
+            } else {
+                LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(items, key = { it.id }) { item ->
+                        val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = { if (it == SwipeToDismissBoxValue.EndToStart) { onRemoveItem(item.id); true } else false })
+                        SwipeToDismissBox(state = dismissState, backgroundContent = {
+                            val color by animateColorAsState(if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) MaterialTheme.colorScheme.error else Color.Transparent, label = "swipe_bg")
+                            Box(Modifier.fillMaxSize().background(color, MaterialTheme.shapes.large).padding(horizontal = 20.dp), contentAlignment = Alignment.CenterEnd) {
+                                if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onError, modifier = Modifier.size(24.dp))
+                            }
+                        }, enableDismissFromStartToEnd = false) {
+                            ExpressiveCartItemCard(item = item, onIncrease = { onUpdateQuantity(item.id, 1) }, onDecrease = { onUpdateQuantity(item.id, -1) }, onRemove = { onRemoveItem(item.id) })
                         }
-                    }, enableDismissFromStartToEnd = false) {
-                        ExpressiveCartItemCard(item = item, onIncrease = { onUpdateQuantity(item.id, 1) }, onDecrease = { onUpdateQuantity(item.id, -1) }, onRemove = { onRemoveItem(item.id) })
                     }
                 }
             }
@@ -94,7 +99,7 @@ fun CartScreen(
 @Composable
 private fun ExpressiveCartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit, onRemove: () -> Unit) {
     val lineTotal = (item.price?.toDoubleOrNull() ?: 0.0) * item.quantity
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) { Text(item.productName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold); item.flavorCode?.let { Text("Crust: $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
