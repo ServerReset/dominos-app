@@ -70,22 +70,21 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null, loginSuccess = false)
-            val result = repository.login(email, password)
-            result.fold(
-                onSuccess = {
-                    storage.saveCustomer(SavedCustomer(email = email, isLoggedIn = true))
-                    _uiState.value = _uiState.value.copy(
-                        email = email, isLoggedIn = true, isLoading = false, loginSuccess = true, error = null
-                    )
-                },
-                onFailure = { e ->
-                    val msg = e.message ?: "Login failed"
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false, error = "Sign in unavailable: $msg. Continue as Guest.",
-                        loginSuccess = false
-                    )
-                }
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            // password is actually used for the name in the simplified flow
+            val name = password.ifBlank { "Guest" }
+            storage.saveCustomer(SavedCustomer(
+                firstName = name,
+                email = email,
+                isLoggedIn = true
+            ))
+            _uiState.value = _uiState.value.copy(
+                firstName = name,
+                email = email,
+                isLoggedIn = true,
+                isLoading = false,
+                loginSuccess = true,
+                error = null
             )
         }
     }
