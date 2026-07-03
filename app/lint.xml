@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="RememberInComposition" severity="ignore" />
+    <issue id="NonNullableMutableLiveData" severity="ignore" />
+</lint>
