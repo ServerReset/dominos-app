@@ -22,6 +22,7 @@ data class AccountUiState(
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val isDarkMode: Boolean = false,
+    val loginSuccess: Boolean = false,
     val error: String? = null
 )
 
@@ -45,14 +46,14 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
 
     fun updateField(field: String, value: String) {
         _uiState.value = when (field) {
-            "firstName" -> _uiState.value.copy(firstName = value)
-            "lastName" -> _uiState.value.copy(lastName = value)
-            "phone" -> _uiState.value.copy(phone = value)
-            "email" -> _uiState.value.copy(email = value)
-            "street" -> _uiState.value.copy(street = value)
-            "city" -> _uiState.value.copy(city = value)
-            "region" -> _uiState.value.copy(region = value)
-            "postalCode" -> _uiState.value.copy(postalCode = value)
+            "firstName" -> _uiState.value.copy(firstName = value, error = null)
+            "lastName" -> _uiState.value.copy(lastName = value, error = null)
+            "phone" -> _uiState.value.copy(phone = value, error = null)
+            "email" -> _uiState.value.copy(email = value, error = null)
+            "street" -> _uiState.value.copy(street = value, error = null)
+            "city" -> _uiState.value.copy(city = value, error = null)
+            "region" -> _uiState.value.copy(region = value, error = null)
+            "postalCode" -> _uiState.value.copy(postalCode = value, error = null)
             else -> _uiState.value
         }
     }
@@ -69,20 +70,29 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null, loginSuccess = false)
             val result = repository.login(email, password)
             result.fold(
                 onSuccess = {
                     storage.saveCustomer(SavedCustomer(email = email, isLoggedIn = true))
-                    _uiState.value = _uiState.value.copy(email = email, isLoggedIn = true, isLoading = false)
+                    _uiState.value = _uiState.value.copy(
+                        email = email, isLoggedIn = true, isLoading = false, loginSuccess = true, error = null
+                    )
                 },
                 onFailure = { e ->
-                    // Still allow guest access with local save
-                    storage.saveCustomer(SavedCustomer(email = email, isLoggedIn = true))
-                    _uiState.value = _uiState.value.copy(email = email, isLoggedIn = true, isLoading = false, error = null)
+                    val msg = e.message ?: "Login failed"
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, error = "Sign in unavailable: $msg. Continue as Guest.",
+                        loginSuccess = false
+                    )
                 }
             )
         }
+    }
+
+    fun guestContinue() {
+        storage.saveCustomer(SavedCustomer(isLoggedIn = true))
+        _uiState.value = _uiState.value.copy(isLoggedIn = true)
     }
 
     fun logout() { storage.logout(); _uiState.value = AccountUiState() }
@@ -94,4 +104,6 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
         storage.setDarkMode(newVal)
         _uiState.value = _uiState.value.copy(isDarkMode = newVal)
     }
+
+    fun clearError() { _uiState.value = _uiState.value.copy(error = null) }
 }

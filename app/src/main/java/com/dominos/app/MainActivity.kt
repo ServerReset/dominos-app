@@ -116,11 +116,21 @@ fun DominosApp(
             }
 
             composable(Screen.Login.route) {
-                LoginScreen(
-                    onGuestContinue = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
-                    onLogin = { email, password -> accountViewModel.login(email, password); navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
-                    isLoading = accountState.isLoading
-                )
+            LaunchedEffect(accountState.loginSuccess) {
+                if (accountState.loginSuccess) {
+                    navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } }
+                }
+            }
+
+            LoginScreen(
+                onGuestContinue = {
+                    accountViewModel.guestContinue()
+                    navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } }
+                },
+                onLogin = { email, password -> accountViewModel.login(email, password) },
+                isLoading = accountState.isLoading,
+                error = accountState.error
+            )
             }
 
             composable(Screen.Account.route) {
