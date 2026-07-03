@@ -40,9 +40,9 @@ fun DominosBottomBar(
                 },
                 label = { Text(item.label) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer
                 )
             )
         }
