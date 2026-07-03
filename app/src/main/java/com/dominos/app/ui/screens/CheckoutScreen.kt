@@ -51,7 +51,8 @@ fun CheckoutScreen(
         if (orderState.orderPlacedSuccessfully) {
             Box(Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.tertiary)
+                    val scale = androidx.compose.animation.core.animateFloatAsState(targetValue = 1f, animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.3f), label = "success_scale")
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(80.dp * scale.value).then(Modifier.size(80.dp)), tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(Modifier.height(16.dp))
                     Text("Order Placed!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     orderState.estimatedWait?.let { Spacer(Modifier.height(8.dp)); Text("Estimated wait: $it", style = MaterialTheme.typography.bodyLarge) }
