@@ -146,12 +146,13 @@ fun DominosApp(
             }
 
             composable(Screen.Home.route) {
-                HomeScreen(
-                    onSearch = { street, zip -> storeViewModel.searchStores(street.ifBlank { "1 Main St" }, zip); navController.navigate(Screen.Stores.route) },
-                    onCartClick = { navController.navigate(Screen.Cart.route) },
-                    onAccountClick = { navController.navigate(Screen.Account.route) },
-                    cartItemCount = cartItemCount
-                )
+            HomeScreen(
+                onSearch = { street, zip -> storeViewModel.searchStores(street.ifBlank { "1 Main St" }, zip); navController.navigate(Screen.Stores.route) },
+                onCartClick = { navController.navigate(Screen.Cart.route) },
+                onAccountClick = { navController.navigate(Screen.Account.route) },
+                cartItemCount = cartItemCount,
+                recentOrderCount = orderHistoryState.orders.size
+            )
             }
 
             composable(Screen.Stores.route) {

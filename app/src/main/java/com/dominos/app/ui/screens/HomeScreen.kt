@@ -26,7 +26,8 @@ fun HomeScreen(
     onSearch: (String, String) -> Unit,
     onCartClick: () -> Unit,
     onAccountClick: () -> Unit,
-    cartItemCount: Int
+    cartItemCount: Int,
+    recentOrderCount: Int = 0
 ) {
     var street by remember { mutableStateOf("") }
     var zip by remember { mutableStateOf("") }
@@ -115,6 +116,20 @@ fun HomeScreen(
                     Column {
                         Text("Mix & Match Deal", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                         Text("Build your own pizza deal", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
+                    }
+                }
+            }
+
+            if (recentOrderCount > 0) {
+                Spacer(Modifier.height(16.dp))
+                Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+                    Row(Modifier.padding(20.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text("$recentOrderCount recent order${if (recentOrderCount > 1) "s" else ""}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                            Text("Tap Account to view history", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }
