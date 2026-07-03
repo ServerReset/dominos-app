@@ -55,7 +55,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             LargeTopAppBar(
-                title = { Text("Domino's", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.headlineMedium) },
+                title = { Text("OpenPizza", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.headlineMedium) },
                 navigationIcon = { IconButton(onClick = onAccountClick) { Icon(Icons.Default.AccountCircle, contentDescription = "Account", modifier = Modifier.size(28.dp)) } },
                 actions = {
                     BadgedBox(badge = { if (cartItemCount > 0) Badge { Text("$cartItemCount") } }) {

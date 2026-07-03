@@ -32,7 +32,7 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Domino's", modifier = Modifier.scale(pulseScale).alpha(fadeAlpha),
+            Text("OpenPizza", modifier = Modifier.scale(pulseScale).alpha(fadeAlpha),
                 style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimary)
             Spacer(Modifier.height(8.dp))
             Text("Pizza Delivery & Carryout", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f))
