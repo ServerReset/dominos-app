@@ -12,7 +12,7 @@ class DominosRepository {
         return runCatching {
             val response = api.findStores(street, cityOrZip)
             if (response.isSuccessful && response.body() != null) response.body()!!
-            else throw Exception("Store lookup failed: ${response.code()} ${response.message()}")
+            else throw Exception("Store lookup failed: ${response.code()}")
         }
     }
 
@@ -28,43 +28,31 @@ class DominosRepository {
         return runCatching {
             val response = api.getMenu(storeID)
             if (response.isSuccessful && response.body() != null) response.body()!!
-            else {
-                val errorBody = response.errorBody()?.string() ?: "unknown"
-                throw Exception("Menu fetch failed: ${response.code()} $errorBody")
-            }
+            else throw Exception("Menu fetch failed: ${response.code()} ${response.errorBody()?.string()}")
         }
     }
 
     suspend fun validateOrder(order: OrderPayload): Result<OrderResponse> {
         return runCatching {
-            val response = api.validateOrder(order)
+            val response = api.validateOrder(mapOf("Order" to order))
             if (response.isSuccessful && response.body() != null) response.body()!!
-            else {
-                val body = response.errorBody()?.string() ?: ""
-                throw Exception("Validate failed: ${response.code()} $body")
-            }
+            else throw Exception("Validate failed: ${response.code()} ${response.errorBody()?.string()}")
         }
     }
 
     suspend fun priceOrder(order: OrderPayload): Result<OrderResponse> {
         return runCatching {
-            val response = api.priceOrder(order)
+            val response = api.priceOrder(mapOf("Order" to order))
             if (response.isSuccessful && response.body() != null) response.body()!!
-            else {
-                val body = response.errorBody()?.string() ?: ""
-                throw Exception("Price failed: ${response.code()} $body")
-            }
+            else throw Exception("Price failed: ${response.code()} ${response.errorBody()?.string()}")
         }
     }
 
     suspend fun placeOrder(order: OrderPayload): Result<OrderResponse> {
         return runCatching {
-            val response = api.placeOrder(order)
+            val response = api.placeOrder(mapOf("Order" to order))
             if (response.isSuccessful && response.body() != null) response.body()!!
-            else {
-                val body = response.errorBody()?.string() ?: ""
-                throw Exception("Place order failed: ${response.code()} $body")
-            }
+            else throw Exception("Place failed: ${response.code()} ${response.errorBody()?.string()}")
         }
     }
 
@@ -85,8 +73,6 @@ class DominosRepository {
     }
 
     suspend fun getTrackerData(orderId: String, phone: String = ""): Result<TrackingResponse> {
-        return runCatching {
-            trackerApi.getTrackerData(orderId, phone)
-        }
+        return runCatching { trackerApi.getTrackerData(orderId, phone) }
     }
 }

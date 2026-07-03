@@ -25,13 +25,13 @@ interface DominosApi {
     ): Response<MenuResponse>
 
     @POST("validate-order")
-    suspend fun validateOrder(@Body order: OrderPayload): Response<OrderResponse>
+    suspend fun validateOrder(@Body body: Map<String, OrderPayload>): Response<OrderResponse>
 
     @POST("price-order")
-    suspend fun priceOrder(@Body order: OrderPayload): Response<OrderResponse>
+    suspend fun priceOrder(@Body body: Map<String, OrderPayload>): Response<OrderResponse>
 
     @POST("place-order")
-    suspend fun placeOrder(@Body order: OrderPayload): Response<OrderResponse>
+    suspend fun placeOrder(@Body body: Map<String, OrderPayload>): Response<OrderResponse>
 
     @POST("paymentGatewayService/braintree/token")
     suspend fun getBraintreeToken(@Body body: Map<String, String>): Response<ResponseBody>

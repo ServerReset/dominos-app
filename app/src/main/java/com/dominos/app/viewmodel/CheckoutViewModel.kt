@@ -15,10 +15,11 @@ data class OrderUiState(
     val validatedOrder: OrderResponse? = null,
     val pricedOrder: OrderResponse? = null,
     val placedOrder: OrderResponse? = null,
-    val serviceMethod: String = "Delivery",
+    val serviceMethod: String = "Carryout",
     val estimatedWait: String? = null,
     val orderPlacedSuccessfully: Boolean = false,
-    val pulseOrderGuid: String? = null
+    val pulseOrderGuid: String? = null,
+    val orderId: String? = null
 )
 
 class CheckoutViewModel : ViewModel() {
@@ -30,20 +31,44 @@ class CheckoutViewModel : ViewModel() {
 
     private fun buildOrder(storeId: String, customer: SavedCustomer, products: List<CartItem>, serviceMethod: String): OrderPayload {
         val orderProducts = products.mapIndexed { index, item ->
-            OrderProduct(code = item.productCode, qty = item.quantity, id = index + 1, isNew = true, options = item.options)
+            OrderProduct(
+                code = item.productCode,
+                qty = item.quantity,
+                id = index + 1,
+                isNew = true,
+                options = item.options
+            )
         }
-        val addrLines = customer.street.split(" ", limit = 2)
-        val address = OrderAddress(
-            street = customer.street, streetNumber = addrLines.getOrNull(0) ?: "",
-            streetName = addrLines.getOrNull(1) ?: customer.street, city = customer.city,
-            region = customer.region, postalCode = customer.postalCode, type = "House"
-        )
+
+        val address = if (serviceMethod == "Delivery") {
+            val addrLines = customer.street.split(" ", limit = 2)
+            OrderAddress(
+                street = customer.street,
+                streetNumber = addrLines.getOrNull(0) ?: "",
+                streetName = addrLines.getOrNull(1) ?: customer.street,
+                city = customer.city,
+                region = customer.region,
+                postalCode = customer.postalCode,
+                type = "House"
+            )
+        } else null
+
         return OrderPayload(
-            storeID = storeId, firstName = customer.firstName, lastName = customer.lastName,
-            phone = customer.phone, email = customer.email, address = address,
-            products = orderProducts, serviceMethod = serviceMethod, languageCode = "en",
-            orderChannel = "OLO", orderMethod = "Web", sourceOrganizationURI = "order.dominos.com",
-            noCombine = true, version = "1.0"
+            storeID = storeId,
+            firstName = customer.firstName.ifBlank { "Guest" },
+            lastName = customer.lastName,
+            phone = customer.phone.ifBlank { "555-0100" },
+            email = customer.email.ifBlank { "guest@example.com" },
+            address = address,
+            products = orderProducts,
+            serviceMethod = serviceMethod,
+            languageCode = "en",
+            orderChannel = "OLO",
+            orderMethod = "Web",
+            sourceOrganizationURI = "order.dominos.com",
+            noCombine = true,
+            version = "1.0",
+            metaData = mapOf("placedBy" to "Guest")
         )
     }
 
@@ -52,15 +77,23 @@ class CheckoutViewModel : ViewModel() {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             val order = buildOrder(storeId, customer, cartItems, serviceMethod)
 
-            repository.validateOrder(order).fold(
+            val validateResult = repository.validateOrder(order)
+            validateResult.fold(
                 onSuccess = { validated ->
                     _uiState.value = _uiState.value.copy(validatedOrder = validated)
-                    repository.priceOrder(order).fold(
+                    val priceResult = repository.priceOrder(order)
+                    priceResult.fold(
                         onSuccess = { priced ->
                             _uiState.value = _uiState.value.copy(pricedOrder = priced, estimatedWait = priced.estimatedWaitMinutes)
-                            repository.placeOrder(order).fold(
+                            val placeResult = repository.placeOrder(order)
+                            placeResult.fold(
                                 onSuccess = { placed ->
-                                    _uiState.value = _uiState.value.copy(isLoading = false, placedOrder = placed, orderResponse = placed, orderPlacedSuccessfully = true, pulseOrderGuid = placed.pulseOrderGuid ?: placed.order?.pulseOrderGuid)
+                                    _uiState.value = _uiState.value.copy(
+                                        isLoading = false, placedOrder = placed, orderResponse = placed,
+                                        orderPlacedSuccessfully = true,
+                                        pulseOrderGuid = placed.pulseOrderGuid ?: placed.order?.pulseOrderGuid,
+                                        orderId = placed.order?.orderID ?: placed.orderID
+                                    )
                                 },
                                 onFailure = { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = "Place order failed: ${e.message}") }
                             )
