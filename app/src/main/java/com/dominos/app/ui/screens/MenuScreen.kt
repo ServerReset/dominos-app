@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,7 +20,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dominos.app.ui.components.DominosProductImage
-import com.dominos.app.ui.components.ShimmerProductCard
 import com.dominos.app.ui.theme.*
 import com.dominos.app.viewmodel.MenuDisplayItem
 import com.dominos.app.viewmodel.MenuUiState
@@ -32,9 +34,13 @@ fun MenuScreen(
     onBack: () -> Unit,
     cartItemCount: Int,
     onToggleFavorite: (String, String) -> Unit = { _, _ -> },
-    isFavorite: (String) -> Boolean = { false }
+    isFavorite: (String) -> Boolean = { false },
+    onRetry: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
+    val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -42,12 +48,13 @@ fun MenuScreen(
                 title = { Text("Menu", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
                 actions = {
-                    BadgedBox(badge = { if (cartItemCount > 0) Badge { Text("$cartItemCount") } }) {
-                        IconButton(onClick = onCartClick) { Icon(Icons.Default.ShoppingCart, contentDescription = "Cart") }
-                    }
+                    BadgedBox(badge = { if (cartItemCount > 0) Badge { Text("$cartItemCount") } }) { IconButton(onClick = onCartClick) { Icon(Icons.Default.ShoppingCart, contentDescription = "Cart") } }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary, actionIconContentColor = MaterialTheme.colorScheme.onPrimary)
             )
+        },
+        floatingActionButton = {
+            if (showFab) SmallFloatingActionButton(onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } }) { Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Back to top") }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -68,6 +75,8 @@ fun MenuScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.error)
                         Spacer(Modifier.height(16.dp)); Text(state.error, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = onRetry, shape = RoundedCornerShape(16.dp)) { Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Retry") }
                     }
                 }
             } else {
@@ -87,7 +96,7 @@ fun MenuScreen(
                         }
                     }
                 } else {
-                    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyColumn(state = listState, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         itemsIndexed(filteredProducts, key = { _, item -> item.productCode }) { _, item ->
                             ExpressiveProductCard(item = item, onClick = { onProductClick(item.productCode) }, isFavorite = isFavorite(item.productCode), onToggleFavorite = { onToggleFavorite(item.productCode, item.productName) })
                         }
@@ -107,31 +116,15 @@ private fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit, is
             Column(Modifier.weight(1f)) {
                 Text(item.productName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 item.description?.let { Spacer(Modifier.height(4.dp)); Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis) }
-                item.tags?.let { tags ->
-                    tags["Calories"]?.toString()?.let { cals ->
-                        Spacer(Modifier.height(2.dp)); Text("$cals cal", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+                item.tags?.let { tags -> tags["Calories"]?.toString()?.let { cals -> Spacer(Modifier.height(2.dp)); Text("$cals cal", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
                 if (item.sizes.isNotEmpty()) {
                     Spacer(Modifier.height(6.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        item.sizes.take(3).forEach { size ->
-                            Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
-                                Text(size.name ?: "", modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { item.sizes.take(3).forEach { size -> Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant) { Text(size.name ?: "", modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 10.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant) } } }
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                IconButton(onClick = onToggleFavorite, modifier = Modifier.size(32.dp)) {
-                    Icon(if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites", tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
-                }
-                item.price?.let {
-                    Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) {
-                        Text(it, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    }
-                }
+                IconButton(onClick = onToggleFavorite, modifier = Modifier.size(32.dp)) { Icon(if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = null, tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp)) }
+                item.price?.let { Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) { Text(it, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } }
             }
         }
     }
