@@ -57,7 +57,7 @@ fun OrderHistoryScreen(
                             Spacer(Modifier.height(8.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Button(onClick = { onReorder(entry.storeId) }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Reorder", fontWeight = FontWeight.Bold) }
-                                OutlinedButton(onClick = { selectedOrder = entry }, shape = RoundedCornerShape(12.dp)) { Text("Details", fontWeight = FontWeight.Medium) }
+                                FilledTonalButton(onClick = { selectedOrder = entry }, shape = MaterialTheme.shapes.large) { Text("Details", fontWeight = FontWeight.Medium) }
                             }
                         }
                     }
@@ -69,6 +69,8 @@ fun OrderHistoryScreen(
     selectedOrder?.let { entry ->
         AlertDialog(
             onDismissRequest = { selectedOrder = null },
+            shape = MaterialTheme.shapes.extraLarge,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             title = { Text("Order #${entry.orderId}", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
