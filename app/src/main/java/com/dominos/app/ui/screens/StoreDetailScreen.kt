@@ -68,7 +68,7 @@ fun StoreDetailScreen(
                 }
             }
 
-            Button(onClick = onViewMenu, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+            Button(onClick = onViewMenu, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                 Icon(Icons.Default.RestaurantMenu, contentDescription = null, modifier = Modifier.size(22.dp)); Spacer(Modifier.width(8.dp)); Text("View Menu", fontWeight = FontWeight.Bold)
             }
         }

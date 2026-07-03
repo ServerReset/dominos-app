@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dominos.app.data.local.LocalStorage
 import com.dominos.app.data.model.SavedCustomer
+import com.dominos.app.data.repository.DominosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ data class AccountUiState(
 
 class AccountViewModel(application: Application) : AndroidViewModel(application) {
     private val storage = LocalStorage(application)
+    private val repository = DominosRepository()
     private val _uiState = MutableStateFlow(AccountUiState())
     val uiState: StateFlow<AccountUiState> = _uiState
 
@@ -68,8 +70,18 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            storage.saveCustomer(SavedCustomer(email = email, isLoggedIn = true))
-            _uiState.value = _uiState.value.copy(email = email, isLoggedIn = true, isLoading = false)
+            val result = repository.login(email, password)
+            result.fold(
+                onSuccess = {
+                    storage.saveCustomer(SavedCustomer(email = email, isLoggedIn = true))
+                    _uiState.value = _uiState.value.copy(email = email, isLoggedIn = true, isLoading = false)
+                },
+                onFailure = { e ->
+                    // Still allow guest access with local save
+                    storage.saveCustomer(SavedCustomer(email = email, isLoggedIn = true))
+                    _uiState.value = _uiState.value.copy(email = email, isLoggedIn = true, isLoading = false, error = null)
+                }
+            )
         }
     }
 

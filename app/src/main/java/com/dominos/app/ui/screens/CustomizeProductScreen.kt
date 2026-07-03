@@ -67,7 +67,7 @@ fun CustomizeProductScreen(
                         if (isPizza && selectedSizeCode.isNotEmpty()) { options["X"] = mapOf("1/1" to "1"); options["C"] = mapOf("1/1" to selectedSizeCode.replace(Regex("[^0-9]"), "")) }
                         selectedToppings.forEach { code -> options[code] = mapOf("1/1" to "1") }
                         onAddToCart(CartItem(productCode = item.productCode, productName = item.productName, quantity = quantity, price = "%.2f".format(totalPrice), options = options.ifEmpty { null }, sizeCode = selectedSizeCode.ifEmpty { null }, flavorCode = selectedFlavorCode, id = 0), storeId)
-                    }, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+                    }, shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                         Text("Add to Cart - \$" + "%.2f".format(totalPrice), fontWeight = FontWeight.Bold)
                     }
                 }
@@ -87,7 +87,7 @@ fun CustomizeProductScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.sizes.forEach { size ->
                             val variant = item.variants.find { it.sizeCode == size.code }; val sizePrice = variant?.price?.toDoubleOrNull(); val isSelected = selectedSizeCode == size.code
-                            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface), border = if (isSelected) CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null) {
+                            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface), border = if (isSelected) CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null) {
                                 Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                     RadioButton(selected = isSelected, onClick = { selectedSizeCode = size.code ?: "" }, colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary))
                                     Spacer(Modifier.width(12.dp)); Text(size.name ?: size.code ?: "", modifier = Modifier.weight(1f), fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.bodyLarge)
@@ -104,7 +104,7 @@ fun CustomizeProductScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         item.flavors.forEach { flavor ->
                             val isSelected = selectedFlavorCode == flavor.code
-                            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
+                            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                                 Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                     RadioButton(selected = isSelected, onClick = { selectedFlavorCode = flavor.code }, colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary))
                                     Spacer(Modifier.width(12.dp)); Text(flavor.name ?: flavor.code ?: "", modifier = Modifier.weight(1f), fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.bodyLarge)

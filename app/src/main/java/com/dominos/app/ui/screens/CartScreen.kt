@@ -60,7 +60,7 @@ fun CartScreen(
                             Text("\$${"%.2f".format(subtotal)}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         }
                         Spacer(Modifier.height(12.dp))
-                        Button(onClick = onCheckout, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+                        Button(onClick = onCheckout, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                             Text("Checkout", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -75,7 +75,7 @@ fun CartScreen(
                     Spacer(Modifier.height(16.dp)); Text("Your cart is empty", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(8.dp)); Text("Add items from the menu to get started", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(24.dp))
-                    Button(onClick = onContinueShopping, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Browse Menu", fontWeight = FontWeight.Bold) }
+                    Button(onClick = onContinueShopping, shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Browse Menu", fontWeight = FontWeight.Bold) }
                 }
             } else {
                 LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

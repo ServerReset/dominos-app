@@ -58,7 +58,7 @@ fun CheckoutScreen(
                     orderState.estimatedWait?.let { Spacer(Modifier.height(8.dp)); Text("Estimated wait: $it", style = MaterialTheme.typography.bodyLarge) }
                     orderState.pulseOrderGuid?.let { Spacer(Modifier.height(4.dp)); Text("Order #$it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     Spacer(Modifier.height(24.dp))
-                    Button(onClick = { onViewTracking(orderState.pulseOrderGuid ?: "") }, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Track Order", fontWeight = FontWeight.Bold) }
+                    Button(onClick = { onViewTracking(orderState.pulseOrderGuid ?: "") }, shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Track Order", fontWeight = FontWeight.Bold) }
                 }
             }
         } else {
@@ -120,7 +120,7 @@ fun CheckoutScreen(
                 }
 
                 orderState.error?.let {
-                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), shape = RoundedCornerShape(16.dp)) {
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), shape = MaterialTheme.shapes.large) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Error, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp)); Text(it, color = MaterialTheme.colorScheme.onErrorContainer, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
@@ -128,7 +128,7 @@ fun CheckoutScreen(
                     }
                 }
 
-                Button(onClick = onPlaceOrder, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), enabled = !orderState.isLoading && accountState.firstName.isNotBlank() && accountState.street.isNotBlank() && cartItems.isNotEmpty()) {
+                Button(onClick = onPlaceOrder, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), enabled = !orderState.isLoading && accountState.firstName.isNotBlank() && accountState.street.isNotBlank() && cartItems.isNotEmpty()) {
                     if (orderState.isLoading) CircularProgressIndicator(Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                     else Text("Place Order", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }

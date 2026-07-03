@@ -76,7 +76,7 @@ fun HomeScreen(
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(value = zip, onValueChange = { zip = it }, label = { Text("City or ZIP Code") }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { onSearch(street, zip) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
+                    Button(onClick = { onSearch(street, zip) }, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
                         Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Search", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.height(8.dp))
@@ -99,7 +99,7 @@ fun HomeScreen(
                         } else {
                             locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                         }
-                    }, modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(16.dp), enabled = !isLocating) {
+                    }, modifier = Modifier.fillMaxWidth().height(48.dp), shape = MaterialTheme.shapes.large, enabled = !isLocating) {
                         if (isLocating) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                         else { Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Use My Location", fontWeight = FontWeight.Medium) }
                     }

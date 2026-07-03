@@ -58,7 +58,7 @@ fun MenuScreen(
             AnimatedVisibility(visible = showFab, enter = scaleIn(), exit = scaleOut()) {
                 SmallFloatingActionButton(
                     onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ) { Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Back to top", tint = MaterialTheme.colorScheme.onPrimaryContainer) }
             }
@@ -83,7 +83,7 @@ fun MenuScreen(
                         Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.error)
                         Spacer(Modifier.height(16.dp)); Text(state.error, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                         Spacer(Modifier.height(16.dp))
-                        Button(onClick = onRetry, shape = RoundedCornerShape(16.dp)) { Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Retry") }
+                        Button(onClick = onRetry, shape = MaterialTheme.shapes.large) { Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Retry") }
                     }
                 }
             } else {
@@ -92,7 +92,7 @@ fun MenuScreen(
                         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             itemsIndexed(state.flatCategories) { index, category ->
                                 val isSelected = index == state.selectedCategoryIndex
-                                FilterChip(selected = isSelected, onClick = { onCategorySelected(index) }, label = { Text(category.name ?: "Category", maxLines = 1, fontSize = 13.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) }, shape = RoundedCornerShape(16.dp), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
+                                FilterChip(selected = isSelected, onClick = { onCategorySelected(index) }, label = { Text(category.name ?: "Category", maxLines = 1, fontSize = 13.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) }, shape = MaterialTheme.shapes.large, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
                             }
                         }
                         HorizontalDivider(thickness = 0.5.dp)

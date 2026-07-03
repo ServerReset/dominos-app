@@ -50,8 +50,8 @@ fun LoginScreen(
                     keyboardActions = KeyboardActions(onDone = { onLogin(email, password) }),
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, cursorColor = MaterialTheme.colorScheme.primary))
                 Spacer(Modifier.height(24.dp))
-                Button(onClick = { onLogin(email, password) }, modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary), enabled = !isLoading
+                Button(onClick = { onLogin(email, password) }, modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary), enabled = !isLoading
                 ) {
                     if (isLoading) CircularProgressIndicator(Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                     else Text("Sign In", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
