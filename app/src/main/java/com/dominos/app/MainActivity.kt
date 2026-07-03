@@ -3,9 +3,9 @@ package com.dominos.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,12 +23,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DominosTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    DominosApp()
+            var isDarkMode by remember { mutableStateOf(false) }
+            val accountViewModel: AccountViewModel = viewModel()
+            val accountState by accountViewModel.uiState.collectAsState()
+            LaunchedEffect(accountState.isDarkMode) { isDarkMode = accountState.isDarkMode }
+
+            DominosTheme(darkTheme = isDarkMode) {
+                Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    DominosApp(accountViewModel = accountViewModel, isDarkMode = isDarkMode, onDarkModeChange = { isDarkMode = it })
                 }
             }
         }
@@ -36,70 +38,62 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DominosApp() {
+fun DominosApp(
+    accountViewModel: AccountViewModel = viewModel(),
+    isDarkMode: Boolean = false,
+    onDarkModeChange: (Boolean) -> Unit = {}
+) {
     val navController = rememberNavController()
-    val accountViewModel: AccountViewModel = viewModel()
     val cartViewModel: CartViewModel = viewModel()
     val storeViewModel: StoreViewModel = viewModel()
     val menuViewModel: MenuViewModel = viewModel()
     val checkoutViewModel: CheckoutViewModel = viewModel()
+    val orderHistoryViewModel: OrderHistoryViewModel = viewModel()
+    val trackingViewModel: TrackingViewModel = viewModel()
+    val favoritesViewModel: FavoritesViewModel = viewModel()
 
     val accountState by accountViewModel.uiState.collectAsState()
     val cartState by cartViewModel.uiState.collectAsState()
     val storeState by storeViewModel.uiState.collectAsState()
     val menuState by menuViewModel.uiState.collectAsState()
     val checkoutState by checkoutViewModel.uiState.collectAsState()
+    val orderHistoryState by orderHistoryViewModel.uiState.collectAsState()
+    val trackingState by trackingViewModel.uiState.collectAsState()
+    val favoritesState by favoritesViewModel.uiState.collectAsState()
 
     val cartItemCount = cartViewModel.getItemCount()
 
     NavHost(
         navController = navController,
-        startDestination = if (accountState.isLoggedIn) Screen.Home.route else Screen.Login.route
+        startDestination = if (accountState.isLoggedIn) Screen.Home.route else Screen.Login.route,
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut() },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn() },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onGuestContinue = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                },
-                onLogin = { email, password ->
-                    accountViewModel.login(email, password)
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                },
-                isLoading = false
+                onGuestContinue = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
+                onLogin = { email, password -> accountViewModel.login(email, password); navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
+                isLoading = accountState.isLoading
             )
         }
 
         composable(Screen.Account.route) {
             AccountScreen(
-                state = accountState,
-                onUpdateField = { field, value -> accountViewModel.updateField(field, value) },
-                onSave = {
-                    accountViewModel.saveProfile()
-                    navController.popBackStack()
-                },
-                onLogout = {
-                    accountViewModel.logout()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                onBack = { navController.popBackStack() }
+                state = accountState, onUpdateField = { field, value -> accountViewModel.updateField(field, value) },
+                onSave = { accountViewModel.saveProfile(); navController.popBackStack() },
+                onLogout = { accountViewModel.logout(); navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } } },
+                onBack = { navController.popBackStack() },
+                onNavigateToOrderHistory = { navController.navigate(Screen.OrderHistory.route) },
+                onNavigateToFavorites = { navController.navigate(Screen.Favorites.route) },
+                onToggleDarkMode = { accountViewModel.toggleDarkMode(); onDarkModeChange(!isDarkMode) }
             )
         }
 
         composable(Screen.Home.route) {
             HomeScreen(
-                onSearch = { street, zip ->
-                    storeViewModel.searchStores(
-                        street.ifBlank { "1 Main St" },
-                        zip
-                    )
-                    navController.navigate(Screen.Stores.route)
-                },
+                onSearch = { street, zip -> storeViewModel.searchStores(street.ifBlank { "1 Main St" }, zip); navController.navigate(Screen.Stores.route) },
                 onCartClick = { navController.navigate(Screen.Cart.route) },
                 onAccountClick = { navController.navigate(Screen.Account.route) },
                 cartItemCount = cartItemCount
@@ -109,112 +103,69 @@ fun DominosApp() {
         composable(Screen.Stores.route) {
             StoresScreen(
                 stores = storeState.stores,
-                onStoreClick = { store ->
-                    val id = store.storeID ?: return@StoresScreen
-                    navController.navigate(Screen.Menu.createRoute(id))
-                },
-                onBack = { navController.popBackStack() }
+                onStoreClick = { store -> val id = store.storeID ?: return@StoresScreen; navController.navigate(Screen.Menu.createRoute(id)) },
+                onStoreDetailClick = { store -> val idx = storeState.stores.indexOf(store); if (idx >= 0) navController.navigate(Screen.StoreDetail.createRoute(idx)) },
+                onBack = { navController.popBackStack() }, isLoading = storeState.isLoading
             )
+        }
+
+        composable(route = Screen.StoreDetail.route, arguments = listOf(navArgument("storeIndex") { type = NavType.IntType })) { backStackEntry ->
+            val storeIndex = backStackEntry.arguments?.getInt("storeIndex") ?: 0
+            val store = storeState.stores.getOrNull(storeIndex)
+            if (store != null) StoreDetailScreen(store = store, onViewMenu = { val id = store.storeID ?: return@StoreDetailScreen; navController.navigate(Screen.Menu.createRoute(id)) }, onBack = { navController.popBackStack() })
         }
 
         composable(Screen.Menu.route) { backStackEntry ->
             val storeId = backStackEntry.arguments?.getString("storeId") ?: ""
-            LaunchedEffect(storeId) {
-                if (menuState.menuResponse == null || menuState.storeId != storeId) {
-                    menuViewModel.loadMenu(storeId)
-                }
-            }
-            MenuScreen(
-                state = menuState,
-                onCategorySelected = { index -> menuViewModel.selectCategory(index) },
-                onProductClick = { productCode ->
-                    navController.navigate("customize/$storeId/$productCode")
-                },
-                onCartClick = { navController.navigate(Screen.Cart.route) },
-                onBack = { navController.popBackStack() },
-                cartItemCount = cartItemCount
-            )
+            LaunchedEffect(storeId) { if (menuState.menuResponse == null || menuState.storeId != storeId) menuViewModel.loadMenu(storeId) }
+            MenuScreen(state = menuState, onCategorySelected = { index -> menuViewModel.selectCategory(index) },
+                onProductClick = { productCode -> navController.navigate("customize/$storeId/$productCode") },
+                onCartClick = { navController.navigate(Screen.Cart.route) }, onBack = { navController.popBackStack() }, cartItemCount = cartItemCount,
+                onToggleFavorite = { code, name -> favoritesViewModel.toggleFavorite(code, name) },
+                isFavorite = { code -> favoritesViewModel.isFavorite(code) })
         }
 
-        composable(
-            route = "customize/{storeId}/{productCode}",
-            arguments = listOf(
-                navArgument("storeId") { type = NavType.StringType },
-                navArgument("productCode") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val storeId = backStackEntry.arguments?.getString("storeId") ?: ""
-            val productCode = backStackEntry.arguments?.getString("productCode") ?: ""
+        composable(route = "customize/{storeId}/{productCode}", arguments = listOf(navArgument("storeId") { type = NavType.StringType }, navArgument("productCode") { type = NavType.StringType })) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId") ?: ""; val productCode = backStackEntry.arguments?.getString("productCode") ?: ""
             val item = menuState.selectedCategoryProducts.find { it.productCode == productCode }
             val categoryCode = menuState.flatCategories.getOrNull(menuState.selectedCategoryIndex)?.code
-            val fullItem = item?.copy(
-                flavors = menuViewModel.getProductFlavors(productCode, categoryCode),
-                sizes = menuViewModel.getProductSizes(productCode)
-            )
-            CustomizeProductScreen(
-                storeId = storeId,
-                item = fullItem,
-                onAddToCart = { cartItem, sId ->
-                    cartViewModel.addItem(cartItem, sId)
-                    navController.popBackStack()
-                },
-                onBack = { navController.popBackStack() }
-            )
+            val fullItem = item?.copy(flavors = menuViewModel.getProductFlavors(productCode, categoryCode), sizes = menuViewModel.getProductSizes(productCode))
+            CustomizeProductScreen(storeId = storeId, item = fullItem, onAddToCart = { cartItem, sId -> cartViewModel.addItem(cartItem, sId); navController.popBackStack() }, onBack = { navController.popBackStack() },
+                onToggleFavorite = { code, name -> favoritesViewModel.toggleFavorite(code, name) }, isFavorite = { code -> favoritesViewModel.isFavorite(code) })
         }
 
         composable(Screen.Cart.route) {
-            CartScreen(
-                items = cartState.items,
-                onUpdateQuantity = { id, delta -> cartViewModel.updateQuantity(id, delta) },
+            CartScreen(items = cartState.items, onUpdateQuantity = { id, delta -> cartViewModel.updateQuantity(id, delta) },
                 onRemoveItem = { id -> cartViewModel.removeItem(id) },
-                onCheckout = {
-                    val sid = cartState.storeId ?: return@CartScreen
-                    navController.navigate(Screen.Checkout.createRoute(sid))
-                },
-                onContinueShopping = { navController.popBackStack() },
-                onBack = { navController.popBackStack() }
-            )
+                onCheckout = { val sid = cartState.storeId ?: return@CartScreen; navController.navigate(Screen.Checkout.createRoute(sid)) },
+                onContinueShopping = { navController.popBackStack() }, onBack = { navController.popBackStack() },
+                onClearCart = { cartViewModel.clearCart() })
         }
 
-        composable(
-            route = "checkout/{storeId}",
-            arguments = listOf(navArgument("storeId") { type = NavType.StringType })
-        ) { backStackEntry ->
+        composable(route = "checkout/{storeId}", arguments = listOf(navArgument("storeId") { type = NavType.StringType })) { backStackEntry ->
             val storeId = backStackEntry.arguments?.getString("storeId") ?: ""
-            CheckoutScreen(
-                storeId = storeId,
-                accountState = accountState,
-                orderState = checkoutState,
-                cartItems = cartState.items,
-                onUpdateField = { field, value -> accountViewModel.updateField(field, value) },
-                onSaveProfile = { accountViewModel.saveProfile() },
-                onPlaceOrder = {
-                    checkoutViewModel.placeOrder(
-                        storeId = storeId,
-                        customer = accountViewModel.getCustomerForOrder(),
-                        cartItems = cartState.items,
-                        serviceMethod = checkoutState.serviceMethod
-                    )
-                },
+            CheckoutScreen(storeId = storeId, accountState = accountState, orderState = checkoutState, cartItems = cartState.items,
+                onUpdateField = { field, value -> accountViewModel.updateField(field, value) }, onSaveProfile = { accountViewModel.saveProfile() },
+                onPlaceOrder = { checkoutViewModel.placeOrder(storeId = storeId, customer = accountViewModel.getCustomerForOrder(), cartItems = cartState.items, serviceMethod = checkoutState.serviceMethod) },
                 onServiceMethodChange = { checkoutViewModel.setServiceMethod(it) },
                 onViewTracking = { orderId ->
                     if (orderId.isNotBlank()) {
+                        val total = "%.2f".format(cartViewModel.getSubtotal())
+                        val itemsSummary = cartState.items.joinToString(", ") { "${it.quantity}x ${it.productName}" }
+                        orderHistoryViewModel.addOrder(orderId, storeId, total, itemsSummary)
+                        trackingViewModel.startTracking(orderId)
                         navController.navigate(Screen.Tracking.createRoute(orderId))
                     }
-                },
-                onBack = { navController.popBackStack() }
-            )
+                }, onBack = { navController.popBackStack() })
         }
 
-        composable(
-            route = "tracking/{orderId}",
-            arguments = listOf(navArgument("orderId") { type = NavType.StringType })
-        ) { backStackEntry ->
+        composable(route = "tracking/{orderId}", arguments = listOf(navArgument("orderId") { type = NavType.StringType })) { backStackEntry ->
             val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
-            TrackingScreen(
-                orderId = orderId,
-                onBack = { navController.popBackStack() }
-            )
+            LaunchedEffect(orderId) { trackingViewModel.startTracking(orderId) }
+            TrackingScreen(orderId = orderId, onBack = { trackingViewModel.stopTracking(); navController.popBackStack() }, currentStage = trackingState.currentStage, isLoadingTracking = trackingState.isLoading)
         }
+
+        composable(Screen.OrderHistory.route) { OrderHistoryScreen(state = orderHistoryState, onBack = { navController.popBackStack() }, onReorder = { storeId -> navController.navigate(Screen.Menu.createRoute(storeId)) }) }
+        composable(Screen.Favorites.route) { FavoritesScreen(state = favoritesState, onBack = { navController.popBackStack() }) }
     }
 }

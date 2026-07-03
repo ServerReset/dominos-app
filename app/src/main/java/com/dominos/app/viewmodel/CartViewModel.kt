@@ -1,6 +1,8 @@
 package com.dominos.app.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.dominos.app.data.local.LocalStorage
 import com.dominos.app.data.model.CartItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,9 +13,19 @@ data class CartUiState(
     val itemCounter: Int = 0
 )
 
-class CartViewModel : ViewModel() {
+class CartViewModel(application: Application) : AndroidViewModel(application) {
+    private val storage = LocalStorage(application)
     private val _uiState = MutableStateFlow(CartUiState())
     val uiState: StateFlow<CartUiState> = _uiState
+
+    init {
+        val savedItems = storage.getCartItems()
+        val savedStoreId = storage.getCartStoreId()
+        if (savedItems.isNotEmpty()) {
+            val nextId = (savedItems.maxOfOrNull { it.id } ?: 0) + 1
+            _uiState.value = CartUiState(items = savedItems, storeId = savedStoreId, itemCounter = nextId)
+        }
+    }
 
     fun addItem(item: CartItem, storeId: String) {
         val current = _uiState.value
@@ -25,41 +37,37 @@ class CartViewModel : ViewModel() {
             _uiState.value = current.copy(items = updatedList, storeId = storeId)
         } else {
             val newItem = item.copy(id = current.itemCounter + 1)
-            _uiState.value = current.copy(
-                items = current.items + newItem,
-                storeId = storeId,
-                itemCounter = current.itemCounter + 1
-            )
+            _uiState.value = current.copy(items = current.items + newItem, storeId = storeId, itemCounter = current.itemCounter + 1)
         }
+        persistCart()
     }
 
     fun updateQuantity(itemId: Int, delta: Int) {
         val current = _uiState.value
-        val updatedList = current.items.map { item ->
+        _uiState.value = current.copy(items = current.items.mapNotNull { item ->
             if (item.id == itemId) {
                 val newQty = item.quantity + delta
-                if (newQty <= 0) return@map null
-                item.copy(quantity = newQty)
+                if (newQty <= 0) null else item.copy(quantity = newQty)
             } else item
-        }.filterNotNull()
-        _uiState.value = current.copy(items = updatedList)
+        })
+        persistCart()
     }
 
     fun removeItem(itemId: Int) {
-        val current = _uiState.value
-        _uiState.value = current.copy(items = current.items.filter { it.id != itemId })
+        _uiState.value = _uiState.value.copy(items = _uiState.value.items.filter { it.id != itemId })
+        persistCart()
     }
 
-    fun clearCart() {
-        _uiState.value = CartUiState()
-    }
+    fun clearCart() { _uiState.value = CartUiState(); persistCart() }
 
-    fun getSubtotal(): Double {
-        return _uiState.value.items.fold(0.0) { acc, item ->
-            val price = item.price?.toDoubleOrNull() ?: 0.0
-            acc + (price * item.quantity)
-        }
+    fun getSubtotal(): Double = _uiState.value.items.fold(0.0) { acc, item ->
+        acc + ((item.price?.toDoubleOrNull() ?: 0.0) * item.quantity)
     }
 
     fun getItemCount(): Int = _uiState.value.items.sumOf { it.quantity }
+
+    private fun persistCart() {
+        val state = _uiState.value
+        storage.saveCart(state.items, state.storeId)
+    }
 }

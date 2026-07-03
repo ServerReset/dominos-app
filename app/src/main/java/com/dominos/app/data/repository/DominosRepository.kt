@@ -6,99 +6,87 @@ import com.dominos.app.data.model.*
 
 class DominosRepository {
     private val api = RetrofitClient.api
+    private val trackerApi = RetrofitClient.trackerApi
 
     suspend fun findStores(street: String, cityOrZip: String): Result<StoreLocatorResponse> {
-        return try {
+        return runCatching {
             val response = api.findStores(street, cityOrZip)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("Store lookup failed: ${response.code()} ${response.message()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+            if (response.isSuccessful && response.body() != null) response.body()!!
+            else throw Exception("Store lookup failed: ${response.code()} ${response.message()}")
         }
     }
 
     suspend fun getStoreProfile(storeID: String): Result<StoreDetailResponse> {
-        return try {
+        return runCatching {
             val response = api.getStoreProfile(storeID)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("Store profile failed: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+            if (response.isSuccessful && response.body() != null) response.body()!!
+            else throw Exception("Store profile failed: ${response.code()}")
         }
     }
 
     suspend fun getMenu(storeID: String): Result<MenuResponse> {
-        return try {
+        return runCatching {
             val response = api.getMenu(storeID)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
+            if (response.isSuccessful && response.body() != null) response.body()!!
+            else {
                 val errorBody = response.errorBody()?.string() ?: "unknown"
-                Result.failure(Exception("Menu fetch failed: ${response.code()} $errorBody"))
+                throw Exception("Menu fetch failed: ${response.code()} $errorBody")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     suspend fun validateOrder(order: OrderPayload): Result<OrderResponse> {
-        return try {
+        return runCatching {
             val response = api.validateOrder(order)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
+            if (response.isSuccessful && response.body() != null) response.body()!!
+            else {
                 val body = response.errorBody()?.string() ?: ""
-                Result.failure(Exception("Validate failed: ${response.code()} $body"))
+                throw Exception("Validate failed: ${response.code()} $body")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     suspend fun priceOrder(order: OrderPayload): Result<OrderResponse> {
-        return try {
+        return runCatching {
             val response = api.priceOrder(order)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
+            if (response.isSuccessful && response.body() != null) response.body()!!
+            else {
                 val body = response.errorBody()?.string() ?: ""
-                Result.failure(Exception("Price failed: ${response.code()} $body"))
+                throw Exception("Price failed: ${response.code()} $body")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     suspend fun placeOrder(order: OrderPayload): Result<OrderResponse> {
-        return try {
+        return runCatching {
             val response = api.placeOrder(order)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
+            if (response.isSuccessful && response.body() != null) response.body()!!
+            else {
                 val body = response.errorBody()?.string() ?: ""
-                Result.failure(Exception("Place order failed: ${response.code()} $body"))
+                throw Exception("Place order failed: ${response.code()} $body")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     suspend fun login(email: String, password: String): Result<Boolean> {
-        return try {
+        return runCatching {
             val response = api.login(mapOf("email" to email, "password" to password))
-            if (response.isSuccessful) {
-                Result.success(true)
-            } else {
-                Result.failure(Exception("Login failed: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+            if (response.isSuccessful) true
+            else throw Exception("Login failed: ${response.code()}")
+        }
+    }
+
+    suspend fun getBraintreeToken(): Result<String> {
+        return runCatching {
+            val response = api.getBraintreeToken(mapOf())
+            if (response.isSuccessful) response.body()?.string() ?: ""
+            else throw Exception("Braintree token failed: ${response.code()}")
+        }
+    }
+
+    suspend fun getTrackerData(orderId: String, phone: String = ""): Result<TrackingResponse> {
+        return runCatching {
+            trackerApi.getTrackerData(orderId, phone)
         }
     }
 }

@@ -5,6 +5,9 @@ sealed class Screen(val route: String) {
     object Account : Screen("account")
     object Home : Screen("home")
     object Stores : Screen("stores")
+    object StoreDetail : Screen("store_detail/{storeIndex}") {
+        fun createRoute(storeIndex: Int) = "store_detail/$storeIndex"
+    }
     object Menu : Screen("menu/{storeId}") {
         fun createRoute(storeId: String) = "menu/$storeId"
     }
@@ -21,4 +24,6 @@ sealed class Screen(val route: String) {
     object Tracking : Screen("tracking/{orderId}") {
         fun createRoute(orderId: String) = "tracking/$orderId"
     }
+    object OrderHistory : Screen("order_history")
+    object Favorites : Screen("favorites")
 }

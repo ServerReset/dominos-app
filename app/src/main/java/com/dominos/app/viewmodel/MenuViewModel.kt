@@ -30,7 +30,8 @@ data class MenuDisplayItem(
     val variants: List<Variant> = emptyList(),
     val sizes: List<SizeDef> = emptyList(),
     val flavors: List<FlavorDef> = emptyList(),
-    val availableToppings: List<ToppingDef> = emptyList()
+    val availableToppings: List<ToppingDef> = emptyList(),
+    val tags: Map<String, Any>? = null
 )
 
 class MenuViewModel(application: Application) : AndroidViewModel(application) {
@@ -145,7 +146,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
                 variants = productVariants,
                 sizes = getProductSizes(code),
                 flavors = emptyList(),
-                availableToppings = allToppings.filter { it.code in availCodes }
+                availableToppings = allToppings.filter { it.code in availCodes },
+                tags = product.tags
             )
         }
     }

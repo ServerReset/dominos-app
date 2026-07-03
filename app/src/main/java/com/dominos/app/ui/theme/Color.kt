@@ -16,3 +16,12 @@ val DominosDarkGray = Color(0xFF1C1C1C)
 val DominosMediumGray = Color(0xFF888888)
 val DominosLightGray = Color(0xFFE0E0E0)
 val DominosCream = Color(0xFFFFF8F0)
+
+val DarkSurface = Color(0xFF1E1E1E)
+val DarkSurfaceVariant = Color(0xFF2C2C2C)
+val DarkSurfaceContainer = Color(0xFF363636)
+val DarkSurfaceBright = Color(0xFF404040)
+val DarkSurfaceDim = Color(0xFF141414)
+
+val DominosRedDarkMode = Color(0xFFFF5A5F)
+val DominosRedContainerDark = Color(0xFF93000A)
