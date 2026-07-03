@@ -12,9 +12,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.dominos.app.ui.theme.DominosRed
-import com.dominos.app.ui.theme.DominosWhite
 import kotlinx.coroutines.delay
 
 @Composable
@@ -31,19 +28,16 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
         label = "fade"
     )
 
-    LaunchedEffect(Unit) {
-        delay(2000)
-        onSplashFinished()
-    }
+    LaunchedEffect(Unit) { delay(2000); onSplashFinished() }
 
-    Box(Modifier.fillMaxSize().background(DominosRed), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Domino's", modifier = Modifier.scale(pulseScale).alpha(fadeAlpha),
-                style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold, color = DominosWhite)
+                style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimary)
             Spacer(Modifier.height(8.dp))
-            Text("Pizza Delivery & Carryout", style = MaterialTheme.typography.titleMedium, color = DominosWhite.copy(alpha = 0.8f))
+            Text("Pizza Delivery & Carryout", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f))
             Spacer(Modifier.height(48.dp))
-            Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = DominosWhite.copy(alpha = 0.6f))
+            Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f))
         }
     }
 }

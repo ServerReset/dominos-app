@@ -20,7 +20,7 @@ fun DominosBottomBar(
     onItemClick: (String) -> Unit
 ) {
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = NavigationBarDefaults.Elevation
     ) {
         items.forEach { item ->
