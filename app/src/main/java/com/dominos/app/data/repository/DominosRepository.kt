@@ -32,11 +32,11 @@ class DominosRepository {
         }
     }
 
-    suspend fun getCoupons(storeID: String): Result<String> {
+    suspend fun getCoupon(storeID: String, couponID: String): Result<String> {
         return runCatching {
-            val response = api.getCoupons(storeID)
+            val response = api.getCoupon(storeID, couponID)
             if (response.isSuccessful) response.body()?.string() ?: ""
-            else throw Exception("Coupons failed: ${response.code()}")
+            else throw Exception("Coupon not found: ${response.code()}")
         }
     }
 
@@ -66,17 +66,7 @@ class DominosRepository {
 
     suspend fun login(email: String, password: String): Result<Boolean> {
         return runCatching {
-            val response = api.login1(mapOf("Email" to email, "Password" to password))
-            if (response.isSuccessful) return@runCatching true
-            val r2 = api.login1(mapOf("email" to email, "password" to password, "rememberMe" to "false"))
-            if (r2.isSuccessful) return@runCatching true
-            val r3 = api.login2(mapOf("email" to email, "password" to password))
-            if (r3.isSuccessful) return@runCatching true
-            val r4 = api.login3(mapOf("Email" to email, "Password" to password, "RememberMe" to "false"))
-            if (r4.isSuccessful) return@runCatching true
-            val r5 = api.login4(mapOf("username" to email, "password" to password))
-            if (r5.isSuccessful) return@runCatching true
-            throw Exception("All auth endpoints returned errors (${response.code()}, ${r2.code()}, ${r3.code()}, ${r4.code()}, ${r5.code()})")
+            throw Exception("Domino's API uses guest ordering only. No login required. Sign in to see local history.")
         }
     }
 
@@ -88,7 +78,7 @@ class DominosRepository {
         }
     }
 
-    suspend fun getTrackerData(orderId: String, phone: String = ""): Result<TrackingResponse> {
-        return runCatching { trackerApi.getTrackerData(orderId, phone) }
+    suspend fun getTrackerData(storeId: String, orderKey: String): Result<TrackingResponse> {
+        return runCatching { trackerApi.getTrackerData(storeId, orderKey) }
     }
 }

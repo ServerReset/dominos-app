@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     private const val BASE_URL = "https://order.dominos.com/power/"
-    private const val TRACKER_BASE_URL = "https://tracker.dominos.com/"
+    private const val TRACKER_BASE_URL = "https://trkweb.dominos.com/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.HEADERS

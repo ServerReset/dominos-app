@@ -2,12 +2,17 @@ package com.dominos.app.data.api
 
 import com.dominos.app.data.model.TrackingResponse
 import retrofit2.http.GET
-import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface DominosTrackerApi {
-    @GET("tracker?{query}")
+    @GET("orderstorage/GetTrackerData")
     suspend fun getTrackerData(
-        @retrofit2.http.Query("orderID") orderID: String,
-        @retrofit2.http.Query("phone") phone: String = ""
+        @Query("StoreID") storeID: String,
+        @Query("OrderKey") orderKey: String
+    ): TrackingResponse
+    
+    @GET("orderstorage/GetTrackerData")
+    suspend fun getTrackerByPhone(
+        @Query("Phone") phone: String
     ): TrackingResponse
 }

@@ -26,12 +26,12 @@ class TrackingViewModel : ViewModel() {
         "Placed", "Preparing", "Baking", "Quality", "Delivery", "Delivered"
     )
 
-    fun startTracking(orderId: String) {
+    fun startTracking(storeId: String, orderKey: String) {
         pollingJob?.cancel()
         pollingJob = viewModelScope.launch {
             _uiState.value = TrackingUiState(isLoading = true)
             while (isActive) {
-                val result = repository.getTrackerData(orderId)
+                val result = repository.getTrackerData(storeId, orderKey)
                 result.fold(
                     onSuccess = { data ->
                         val stage = data.orderStage ?: data.status ?: ""

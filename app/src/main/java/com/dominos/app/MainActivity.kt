@@ -205,21 +205,22 @@ fun DominosApp(
                     onPlaceOrder = { checkoutViewModel.placeOrder(storeId = storeId, customer = accountViewModel.getCustomerForOrder(), cartItems = cartState.items, serviceMethod = checkoutState.serviceMethod) },
                     onServiceMethodChange = { checkoutViewModel.setServiceMethod(it) },
                     onViewTracking = { orderId ->
-                        if (orderId.isNotBlank()) {
-                            val total = "%.2f".format(cartViewModel.getSubtotal())
-                            val itemsSummary = cartState.items.joinToString(", ") { "${it.quantity}x ${it.productName}" }
-                            orderHistoryViewModel.addOrder(orderId, storeId, total, itemsSummary)
-                            trackingViewModel.startTracking(orderId)
-                            navController.navigate(Screen.Tracking.createRoute(orderId))
-                        }
-                    }, onBack = { navController.popBackStack() })
+                    if (orderId.isNotBlank()) {
+                        val total = "%.2f".format(cartViewModel.getSubtotal())
+                        val itemsSummary = cartState.items.joinToString(", ") { "${it.quantity}x ${it.productName}" }
+                        orderHistoryViewModel.addOrder(orderId, storeId, total, itemsSummary)
+                        trackingViewModel.startTracking(storeId, orderId)
+                        navController.navigate(Screen.Tracking.createRoute(storeId, orderId))
+                    }
+                }, onBack = { navController.popBackStack() })
             }
 
-            composable(route = "tracking/{orderId}", arguments = listOf(navArgument("orderId") { type = NavType.StringType })) { backStackEntry ->
-                val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
-                LaunchedEffect(orderId) { trackingViewModel.startTracking(orderId) }
-                TrackingScreen(orderId = orderId, onBack = { trackingViewModel.stopTracking(); navController.popBackStack() }, currentStage = trackingState.currentStage, isLoadingTracking = trackingState.isLoading)
-            }
+        composable(route = "tracking/{storeId}/{orderId}", arguments = listOf(navArgument("storeId") { type = NavType.StringType }, navArgument("orderId") { type = NavType.StringType })) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId") ?: ""
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            LaunchedEffect(orderId) { trackingViewModel.startTracking(storeId, orderId) }
+            TrackingScreen(orderId = orderId, onBack = { trackingViewModel.stopTracking(); navController.popBackStack() }, currentStage = trackingState.currentStage, isLoadingTracking = trackingState.isLoading)
+        }
 
             composable(Screen.OrderHistory.route) { OrderHistoryScreen(state = orderHistoryState, onBack = { navController.popBackStack() }, onReorder = { storeId -> navController.navigate(Screen.Menu.createRoute(storeId)) }) }
             composable(Screen.Favorites.route) { FavoritesScreen(state = favoritesState, onBack = { navController.popBackStack() }) }
