@@ -31,7 +31,8 @@ fun CartScreen(
     onContinueShopping: () -> Unit,
     onBack: () -> Unit,
     onClearCart: () -> Unit = {},
-    storeId: String? = null
+    storeId: String? = null,
+    storeAddress: String? = null
 ) {
     val subtotal = items.fold(0.0) { acc, item -> acc + ((item.price?.toDoubleOrNull() ?: 0.0) * item.quantity) }
 
@@ -86,7 +87,7 @@ fun CartScreen(
                                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Store, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                                     Spacer(Modifier.width(8.dp))
-                                    Text("Store #$sid", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                    Text(storeAddress ?: "Store #$sid", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
                                 }
                             }
                         }
