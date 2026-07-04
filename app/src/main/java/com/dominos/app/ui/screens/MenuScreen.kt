@@ -36,7 +36,8 @@ fun MenuScreen(
     cartItemCount: Int,
     onToggleFavorite: (String, String) -> Unit = { _, _ -> },
     isFavorite: (String) -> Boolean = { false },
-    onRetry: () -> Unit = {}
+    onRetry: () -> Unit = {},
+    onQuickAdd: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -107,7 +108,8 @@ fun MenuScreen(
                         } else {
                             LazyColumn(state = listState, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 itemsIndexed(filteredProducts, key = { _, item -> item.productCode }) { _, item ->
-                                        ExpressiveProductCard(item = item, onClick = { onProductClick(item.productCode) }, isFavorite = isFavorite(item.productCode), onToggleFavorite = { onToggleFavorite(item.productCode, item.productName) })
+                                        ExpressiveProductCard(item = item, onClick = { onProductClick(item.productCode) }, isFavorite = isFavorite(item.productCode), onToggleFavorite = { onToggleFavorite(item.productCode, item.productName) },
+                                        onQuickAdd = { code, name, price -> onQuickAdd(code, name, price) })
                                 }
                             }
                         }
@@ -119,7 +121,7 @@ fun MenuScreen(
 }
 
 @Composable
-private fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit, isFavorite: Boolean = false, onToggleFavorite: () -> Unit = {}) {
+private fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit, isFavorite: Boolean = false, onToggleFavorite: () -> Unit = {}, onQuickAdd: (String, String, String) -> Unit = { _, _, _ -> }) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             DominosProductImage(productCode = item.imageCode ?: item.productCode, modifier = Modifier.size(72.dp))
@@ -135,7 +137,11 @@ private fun ExpressiveProductCard(item: MenuDisplayItem, onClick: () -> Unit, is
             }
             Column(horizontalAlignment = Alignment.End) {
                 IconButton(onClick = onToggleFavorite, modifier = Modifier.size(32.dp)) { Icon(if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = null, tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp)) }
-                item.price?.let { Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) { Text(it, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } }
+                item.price?.let { price ->
+                    Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) { Text(price, modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) }
+                    Spacer(Modifier.height(4.dp))
+                    FilledIconButton(onClick = { onQuickAdd(item.productCode, item.productName, price) }, modifier = Modifier.size(32.dp), shape = RoundedCornerShape(12.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary)) { Icon(Icons.Default.Add, contentDescription = "Quick add", modifier = Modifier.size(16.dp)) }
+                }
             }
         }
     }

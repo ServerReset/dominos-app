@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dominos.app.data.model.CartItem
 import com.dominos.app.navigation.Screen
 import com.dominos.app.ui.components.BottomNavItem
 import com.dominos.app.ui.components.DominosBottomBar
@@ -175,12 +176,13 @@ fun DominosApp(
             composable(Screen.Menu.route) { backStackEntry ->
                 val storeId = backStackEntry.arguments?.getString("storeId") ?: ""
                 LaunchedEffect(storeId) { if (menuState.menuResponse == null || menuState.storeId != storeId) menuViewModel.loadMenu(storeId) }
-                MenuScreen(state = menuState, onCategorySelected = { index -> menuViewModel.selectCategory(index) },
-                    onProductClick = { productCode -> navController.navigate("customize/$storeId/$productCode") },
-                    onCartClick = { navController.navigate(Screen.Cart.route) }, onBack = { navController.popBackStack() }, cartItemCount = cartItemCount,
-                    onToggleFavorite = { code, name -> favoritesViewModel.toggleFavorite(code, name) },
-                    isFavorite = { code -> favoritesViewModel.isFavorite(code) },
-                    onRetry = { menuViewModel.loadMenu(storeId) })
+            MenuScreen(state = menuState, onCategorySelected = { index -> menuViewModel.selectCategory(index) },
+                onProductClick = { productCode -> navController.navigate("customize/$storeId/$productCode") },
+                onCartClick = { navController.navigate(Screen.Cart.route) }, onBack = { navController.popBackStack() }, cartItemCount = cartItemCount,
+                onToggleFavorite = { code, name -> favoritesViewModel.toggleFavorite(code, name) },
+                isFavorite = { code -> favoritesViewModel.isFavorite(code) },
+                onRetry = { menuViewModel.loadMenu(storeId) },
+                onQuickAdd = { code, name, price -> cartViewModel.addItem(CartItem(productCode = code, productName = name, quantity = 1, price = price, id = 0), storeId) })
             }
 
             composable(route = "customize/{storeId}/{productCode}", arguments = listOf(navArgument("storeId") { type = NavType.StringType }, navArgument("productCode") { type = NavType.StringType })) { backStackEntry ->
