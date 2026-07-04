@@ -134,15 +134,17 @@ fun DominosApp(
             }
 
             composable(Screen.Account.route) {
-                AccountScreen(
-                    state = accountState, onUpdateField = { field, value -> accountViewModel.updateField(field, value) },
-                    onSave = { accountViewModel.saveProfile(); navController.popBackStack() },
-                    onLogout = { accountViewModel.logout(); navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } } },
-                    onBack = { navController.popBackStack() },
-                    onNavigateToOrderHistory = { navController.navigate(Screen.OrderHistory.route) },
-                    onNavigateToFavorites = { navController.navigate(Screen.Favorites.route) },
-                    onToggleDarkMode = { accountViewModel.toggleDarkMode(); onDarkModeChange(!isDarkMode) }
-                )
+            AccountScreen(
+                state = accountState, onUpdateField = { field, value -> accountViewModel.updateField(field, value) },
+                onSave = { accountViewModel.saveProfile(); navController.popBackStack() },
+                onLogout = { accountViewModel.logout(); navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } } },
+                onBack = { navController.popBackStack() },
+                onNavigateToOrderHistory = { navController.navigate(Screen.OrderHistory.route) },
+                onNavigateToFavorites = { navController.navigate(Screen.Favorites.route) },
+                onToggleDarkMode = { accountViewModel.toggleDarkMode(); onDarkModeChange(!isDarkMode) },
+                orderCount = orderHistoryState.orders.size,
+                favoritesCount = favoritesState.favorites.size
+            )
             }
 
             composable(Screen.Home.route) {

@@ -30,7 +30,9 @@ fun AccountScreen(
     onBack: () -> Unit,
     onNavigateToOrderHistory: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
-    onToggleDarkMode: () -> Unit = {}
+    onToggleDarkMode: () -> Unit = {},
+    orderCount: Int = 0,
+    favoritesCount: Int = 0
 ) {
     Scaffold(
         topBar = {
@@ -81,10 +83,12 @@ fun AccountScreen(
 
             FilledTonalButton(onClick = onNavigateToOrderHistory, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large) {
                 Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Order History", fontWeight = FontWeight.Bold)
+                if (orderCount > 0) { Spacer(Modifier.width(4.dp)); Badge { Text("$orderCount") } }
             }
 
             FilledTonalButton(onClick = onNavigateToFavorites, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large) {
                 Icon(Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Favorites", fontWeight = FontWeight.Bold)
+                if (favoritesCount > 0) { Spacer(Modifier.width(4.dp)); Badge { Text("$favoritesCount") } }
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
