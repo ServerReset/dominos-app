@@ -204,7 +204,7 @@ fun DominosApp(
                 val storeId = backStackEntry.arguments?.getString("storeId") ?: ""
                 CheckoutScreen(storeId = storeId, accountState = accountState, orderState = checkoutState, cartItems = cartState.items,
                     onUpdateField = { field, value -> accountViewModel.updateField(field, value) }, onSaveProfile = { accountViewModel.saveProfile() },
-                    onPlaceOrder = { checkoutViewModel.placeOrder(storeId = storeId, customer = accountViewModel.getCustomerForOrder(), cartItems = cartState.items, serviceMethod = checkoutState.serviceMethod) },
+                    onPlaceOrder = { checkoutViewModel.placeOrder(storeId = storeId, customer = accountViewModel.getCustomerForOrder(), cartItems = cartState.items, serviceMethod = checkoutState.serviceMethod); accountViewModel.saveProfile() },
                     onServiceMethodChange = { checkoutViewModel.setServiceMethod(it) },
                     onViewTracking = { orderId ->
                     if (orderId.isNotBlank()) {
