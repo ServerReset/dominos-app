@@ -34,12 +34,14 @@ fun CheckoutScreen(
     onPlaceOrder: () -> Unit,
     onServiceMethodChange: (String) -> Unit,
     onViewTracking: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onTipChange: (Double) -> Unit = {}
 ) {
     var couponCode by remember { mutableStateOf("") }
     var tipPercent by remember { mutableIntStateOf(15) }
     val subtotal = cartItems.fold(0.0) { acc, item -> acc + ((item.price?.toDoubleOrNull() ?: 0.0) * item.quantity) }
     val tipAmount = subtotal * tipPercent / 100.0
+    LaunchedEffect(tipPercent) { onTipChange(tipAmount) }
 
     Scaffold(
         topBar = {

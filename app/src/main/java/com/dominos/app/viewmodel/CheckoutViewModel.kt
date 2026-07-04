@@ -19,7 +19,8 @@ data class OrderUiState(
     val estimatedWait: String? = null,
     val orderPlacedSuccessfully: Boolean = false,
     val pulseOrderGuid: String? = null,
-    val orderId: String? = null
+    val orderId: String? = null,
+    val tipAmount: Double = 0.0
 )
 
 class CheckoutViewModel : ViewModel() {
@@ -28,8 +29,9 @@ class CheckoutViewModel : ViewModel() {
     val uiState: StateFlow<OrderUiState> = _uiState
 
     fun setServiceMethod(method: String) { _uiState.value = _uiState.value.copy(serviceMethod = method) }
+    fun setTipAmount(amount: Double) { _uiState.value = _uiState.value.copy(tipAmount = amount) }
 
-    private fun buildOrder(storeId: String, customer: SavedCustomer, products: List<CartItem>, serviceMethod: String): OrderPayload {
+    private fun buildOrder(storeId: String, customer: SavedCustomer, products: List<CartItem>, serviceMethod: String, tipAmount: Double = 0.0): OrderPayload {
         val orderProducts = products.mapIndexed { index, item ->
             OrderProduct(
                 code = item.productCode,
@@ -53,6 +55,7 @@ class CheckoutViewModel : ViewModel() {
             )
         } else null
 
+        val orderTotal = products.sumOf { it.quantity * (it.price?.toDoubleOrNull() ?: 0.0) }
         return OrderPayload(
             storeID = storeId,
             firstName = customer.firstName.ifBlank { "Guest" },
@@ -68,14 +71,14 @@ class CheckoutViewModel : ViewModel() {
             sourceOrganizationURI = "order.dominos.com",
             noCombine = true,
             version = "1.0",
-            payments = listOf(PaymentPayload(amount = "0.00", cardType = null, number = null, expiration = null, securityCode = null, postalCode = null, tipAmount = "0.00"))
+            payments = listOf(PaymentPayload(amount = "%.2f".format(orderTotal), tipAmount = "%.2f".format(tipAmount)))
         )
     }
 
-    fun placeOrder(storeId: String, customer: SavedCustomer, cartItems: List<CartItem>, serviceMethod: String) {
+    fun placeOrder(storeId: String, customer: SavedCustomer, cartItems: List<CartItem>, serviceMethod: String, tipAmount: Double = 0.0) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            val order = buildOrder(storeId, customer, cartItems, serviceMethod)
+            val order = buildOrder(storeId, customer, cartItems, serviceMethod, tipAmount)
 
             val validateResult = repository.validateOrder(order)
             validateResult.fold(
