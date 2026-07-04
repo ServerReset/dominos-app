@@ -199,7 +199,8 @@ fun DominosApp(
                     onRemoveItem = { id -> cartViewModel.removeItem(id) },
                     onCheckout = { val sid = cartState.storeId ?: return@CartScreen; navController.navigate(Screen.Checkout.createRoute(sid)) },
                     onContinueShopping = { navController.popBackStack() }, onBack = { navController.popBackStack() },
-                    onClearCart = { cartViewModel.clearCart() })
+                    onClearCart = { cartViewModel.clearCart() },
+                storeId = cartState.storeId)
             }
 
             composable(route = "checkout/{storeId}", arguments = listOf(navArgument("storeId") { type = NavType.StringType })) { backStackEntry ->

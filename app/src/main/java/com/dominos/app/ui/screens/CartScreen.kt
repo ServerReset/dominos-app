@@ -30,7 +30,8 @@ fun CartScreen(
     onCheckout: () -> Unit,
     onContinueShopping: () -> Unit,
     onBack: () -> Unit,
-    onClearCart: () -> Unit = {}
+    onClearCart: () -> Unit = {},
+    storeId: String? = null
 ) {
     val subtotal = items.fold(0.0) { acc, item -> acc + ((item.price?.toDoubleOrNull() ?: 0.0) * item.quantity) }
 
@@ -79,6 +80,17 @@ fun CartScreen(
                 }
             } else {
                 LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    storeId?.let { sid ->
+                        item {
+                            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))) {
+                                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Store, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Store #$sid", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                }
+                            }
+                        }
+                    }
                     items(items, key = { it.id }) { item ->
                         val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = { if (it == SwipeToDismissBoxValue.EndToStart) { onRemoveItem(item.id); true } else false })
                         SwipeToDismissBox(state = dismissState, backgroundContent = {
