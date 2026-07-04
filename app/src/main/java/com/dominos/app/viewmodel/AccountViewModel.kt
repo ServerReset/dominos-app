@@ -71,7 +71,6 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            // password is actually used for the name in the simplified flow
             val name = password.ifBlank { "Guest" }
             storage.saveCustomer(SavedCustomer(
                 firstName = name,
@@ -79,12 +78,9 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
                 isLoggedIn = true
             ))
             _uiState.value = _uiState.value.copy(
-                firstName = name,
-                email = email,
-                isLoggedIn = true,
-                isLoading = false,
-                loginSuccess = true,
-                error = null
+                firstName = name, email = email,
+                isLoggedIn = true, isLoading = false,
+                loginSuccess = true, error = null
             )
         }
     }

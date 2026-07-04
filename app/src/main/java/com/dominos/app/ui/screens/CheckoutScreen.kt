@@ -37,7 +37,9 @@ fun CheckoutScreen(
     onBack: () -> Unit
 ) {
     var couponCode by remember { mutableStateOf("") }
+    var tipPercent by remember { mutableIntStateOf(15) }
     val subtotal = cartItems.fold(0.0) { acc, item -> acc + ((item.price?.toDoubleOrNull() ?: 0.0) * item.quantity) }
+    val tipAmount = subtotal * tipPercent / 100.0
 
     Scaffold(
         topBar = {
@@ -120,6 +122,22 @@ fun CheckoutScreen(
                             Text("Tax & Fees", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                             Text("Calculated at store", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+                }
+
+                ExpressiveSectionCard("Tip") {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(0, 10, 15, 20, 25).forEach { tip ->
+                            val selected = tipPercent == tip
+                            FilterChip(selected = selected, onClick = { tipPercent = tip },
+                                label = { Text(if (tip == 0) "None" else "$tip%", fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                                shape = MaterialTheme.shapes.large,
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer, selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer))
+                        }
+                    }
+                    if (tipPercent > 0) {
+                        Spacer(Modifier.height(8.dp))
+                        Text("Tip: \$${"%.2f".format(tipAmount)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                 }
 
