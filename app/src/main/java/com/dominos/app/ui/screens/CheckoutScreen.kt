@@ -95,7 +95,11 @@ fun CheckoutScreen(
                 }
 
                 ExpressiveSectionCard("Coupon Code") {
-                    OutlinedTextField(value = couponCode, onValueChange = { couponCode = it }, label = { Text("Enter coupon code") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(value = couponCode, onValueChange = { couponCode = it }, label = { Text("Enter coupon code") }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
+                        Spacer(Modifier.width(8.dp))
+                        FilledTonalButton(onClick = { /* TODO: validate coupon via API */ }, shape = MaterialTheme.shapes.large, modifier = Modifier.height(56.dp)) { Text("Apply", fontWeight = FontWeight.Bold) }
+                    }
                 }
 
                 ExpressiveSectionCard("Order Summary") {

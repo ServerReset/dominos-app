@@ -68,6 +68,13 @@ fun StoresScreen(
                                 if (store.allowDeliveryOrders) AssistChip(onClick = { onStoreClick(store) }, label = { Text("Delivery") }, shape = RoundedCornerShape(12.dp))
                                 if (store.allowCarryoutOrders) AssistChip(onClick = { onStoreClick(store) }, label = { Text("Carryout") }, shape = RoundedCornerShape(12.dp))
                             }
+                            store.estimatedWaitMinutes?.let { wait ->
+                                Spacer(Modifier.height(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    wait.delivery?.let { d -> if (d.min > 0) Text("Delivery: ${d.min}-${d.max}min", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary) }
+                                    wait.carryout?.let { c -> if (c.min > 0) Text("Carryout: ${c.min}-${c.max}min", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary) }
+                                }
+                            }
                         }
                     }
                 }
