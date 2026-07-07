@@ -1,6 +1,10 @@
 package com.dominos.app.ui.screens
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -53,7 +57,9 @@ fun CheckoutScreen(
         }
     ) { padding ->
         if (orderState.orderPlacedSuccessfully) {
-            Box(Modifier.fillMaxSize().padding(padding).padding(32.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxSize().padding(padding).padding(32.dp).background(
+                Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f), MaterialTheme.colorScheme.surface))
+            ), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     val scale = androidx.compose.animation.core.animateFloatAsState(targetValue = 1f, animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.3f), label = "success_scale")
                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(80.dp * scale.value).then(Modifier.size(80.dp)), tint = MaterialTheme.colorScheme.tertiary)
