@@ -29,10 +29,11 @@ fun HomeScreen(
     cartItemCount: Int,
     recentOrderCount: Int = 0
 ) {
-    var street by remember { mutableStateOf("") }
-    var zip by remember { mutableStateOf("") }
-    var isLocating by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val storage = remember { com.dominos.app.data.local.LocalStorage(context) }
+    var street by remember { mutableStateOf(storage.getLastStreet()) }
+    var zip by remember { mutableStateOf(storage.getLastZipCode()) }
+    var isLocating by remember { mutableStateOf(false) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
@@ -77,7 +78,7 @@ fun HomeScreen(
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(value = zip, onValueChange = { zip = it }, label = { Text("City or ZIP Code") }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { onSearch(street, zip) }, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
+                    Button(onClick = { storage.saveLastStreet(street); storage.saveLastZipCode(zip); onSearch(street, zip) }, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
                         Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Search", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.height(8.dp))
