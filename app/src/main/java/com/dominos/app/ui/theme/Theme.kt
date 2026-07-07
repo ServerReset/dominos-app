@@ -1,6 +1,7 @@
 package com.dominos.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -10,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// Expressive color palette - bold pizza-red with warm neutrals
 private val ExpressiveLightColors = lightColorScheme(
     primary = DominosRed,
     onPrimary = DominosWhite,
@@ -86,6 +88,16 @@ private val ExpressiveDarkColors = darkColorScheme(
     surfaceTint = DominosRedDarkMode
 )
 
+// Mixed geometry: cut corners on extraSmall, rounded elsewhere
+// Bloo-inspired: small (8dp), medium (16dp), large (24dp), extraLarge (28dp)
+val M3ExpressiveShapes = Shapes(
+    extraSmall = CutCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(14.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(28.dp)
+)
+
 val M3ExpressiveTypography = Typography(
     displayLarge = TextStyle(fontWeight = FontWeight.Bold, fontSize = 57.sp, lineHeight = 64.sp, letterSpacing = (-0.25).sp),
     displayMedium = TextStyle(fontWeight = FontWeight.Bold, fontSize = 45.sp, lineHeight = 52.sp),
@@ -102,14 +114,6 @@ val M3ExpressiveTypography = Typography(
     labelLarge = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp),
     labelMedium = TextStyle(fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp),
     labelSmall = TextStyle(fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp)
-)
-
-val M3ExpressiveShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(14.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(28.dp)
 )
 
 @Composable
