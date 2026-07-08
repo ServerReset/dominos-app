@@ -57,12 +57,13 @@ fun CheckoutScreen(
         }
     ) { padding ->
         if (orderState.orderPlacedSuccessfully) {
+            // Bloo-inspired success celebration with gradient and spring
+            val springScale = androidx.compose.animation.core.animateFloatAsState(targetValue = 1f, animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.3f, stiffness = 200f), label = "spring_scale")
             Box(Modifier.fillMaxSize().padding(padding).padding(32.dp).background(
-                Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f), MaterialTheme.colorScheme.surface))
+                Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f), MaterialTheme.colorScheme.surface))
             ), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val scale = androidx.compose.animation.core.animateFloatAsState(targetValue = 1f, animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.3f), label = "success_scale")
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(80.dp * scale.value).then(Modifier.size(80.dp)), tint = MaterialTheme.colorScheme.tertiary)
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size((80 * springScale.value).dp), tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(Modifier.height(16.dp))
                     Text("Order Placed!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     orderState.estimatedWait?.let { Spacer(Modifier.height(8.dp)); Text("Estimated wait: $it", style = MaterialTheme.typography.bodyLarge) }
