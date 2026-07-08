@@ -7,17 +7,21 @@ import android.location.Geocoder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-
+import com.dominos.app.ui.components.BlooCard
+import com.dominos.app.ui.components.BlooGradientBackground
+import com.dominos.app.ui.components.BlooMorphButton
+import com.dominos.app.ui.components.BlooPebbleCard
+import com.dominos.app.ui.components.BlooSectionTitle
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,12 +48,9 @@ fun HomeScreen(
                 if (provider != null) {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     val addresses: List<Address> = geocoder.getFromLocation(provider.latitude, provider.longitude, 1) ?: emptyList()
-                    if (addresses.isNotEmpty()) {
-                        zip = addresses[0].postalCode ?: ""
-                        street = "${addresses[0].thoroughfare ?: ""} ${addresses[0].subThoroughfare ?: ""}".trim()
-                    }
+                    if (addresses.isNotEmpty()) { zip = addresses[0].postalCode ?: ""; street = "${addresses[0].thoroughfare ?: ""} ${addresses[0].subThoroughfare ?: ""}".trim() }
                 }
-            } catch (e: Exception) { /* silently fail */ }
+            } catch (_: Exception) {}
             isLocating = false
         }
     }
@@ -58,82 +59,48 @@ fun HomeScreen(
         topBar = {
             LargeTopAppBar(
                 title = { Text("OpenPizza", fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.headlineMedium) },
-                navigationIcon = { IconButton(onClick = onAccountClick) { Icon(Icons.Default.AccountCircle, contentDescription = "Account", modifier = Modifier.size(28.dp)) } },
-                actions = {
-                    BadgedBox(badge = { if (cartItemCount > 0) Badge { Text("$cartItemCount") } }) {
-                        IconButton(onClick = onCartClick) { Icon(Icons.Default.ShoppingCart, contentDescription = "Cart", modifier = Modifier.size(28.dp)) }
-                    }
-                },
+                navigationIcon = { IconButton(onClick = onAccountClick) { Icon(Icons.Default.AccountCircle, "Account", modifier = Modifier.size(28.dp)) } },
+                actions = { BadgedBox(badge = { if (cartItemCount > 0) Badge { Text("$cartItemCount") } }) { IconButton(onClick = onCartClick) { Icon(Icons.Default.ShoppingCart, "Cart", modifier = Modifier.size(28.dp)) } } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer)
             )
         }
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp, vertical = 16.dp)) {
-            Text("Find a Store Near You", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-            Spacer(Modifier.height(16.dp))
-
-            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-                Column(Modifier.padding(16.dp)) {
-                    OutlinedTextField(value = street, onValueChange = { street = it }, label = { Text("Street Address") }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
+        BlooGradientBackground {
+            Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                BlooSectionTitle("Find a Store Near You")
+                BlooCard {
+                    OutlinedTextField(value = street, onValueChange = { street = it }, label = { Text("Street Address") }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = zip, onValueChange = { zip = it }, label = { Text("City or ZIP Code") }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
                     Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(value = zip, onValueChange = { zip = it }, label = { Text("City or ZIP Code") }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary))
-                    Spacer(Modifier.height(16.dp))
-                    Button(onClick = { storage.saveLastStreet(street); storage.saveLastZipCode(zip); onSearch(street, zip) }, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
-                        Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Search", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Button(onClick = { storage.saveLastStreet(street); storage.saveLastZipCode(zip); onSearch(street, zip) }, modifier = Modifier.fillMaxWidth().height(56.dp), shape = MaterialTheme.shapes.large, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+                        Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Search", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.height(8.dp))
-                    FilledTonalButton(onClick = {
+                    BlooMorphButton(onClick = {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                            isLocating = true
-                            try {
-                                val locationManager = context.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
+                            isLocating = true; try { val locationManager = context.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
                                 val provider = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER) ?: locationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
-                                if (provider != null) {
-                                    val geocoder = Geocoder(context, Locale.getDefault())
-                                    val addresses: List<Address> = geocoder.getFromLocation(provider.latitude, provider.longitude, 1) ?: emptyList()
-                                    if (addresses.isNotEmpty()) {
-                                        zip = addresses[0].postalCode ?: ""
-                                        street = "${addresses[0].thoroughfare ?: ""} ${addresses[0].subThoroughfare ?: ""}".trim()
-                                    }
-                                }
-                            } catch (e: Exception) { /* silently fail */ }
-                            isLocating = false
-                        } else {
-                            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        }
-                    }, modifier = Modifier.fillMaxWidth().height(48.dp), shape = MaterialTheme.shapes.large, enabled = !isLocating) {
+                                if (provider != null) { val gc = Geocoder(context, Locale.getDefault()); val adds: List<Address> = gc.getFromLocation(provider.latitude, provider.longitude, 1) ?: emptyList()
+                                    if (adds.isNotEmpty()) { zip = adds[0].postalCode ?: ""; street = "${adds[0].thoroughfare ?: ""} ${adds[0].subThoroughfare ?: ""}".trim() } }
+                            } catch (_: Exception) {}; isLocating = false
+                        } else locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    }, active = !isLocating, modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(vertical = 12.dp)) {
                         if (isLocating) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                        else { Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Use My Location", fontWeight = FontWeight.Medium) }
+                        else { Icon(Icons.Default.MyLocation, null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Use My Location", fontWeight = FontWeight.Medium) }
                     }
                 }
-            }
 
-            Spacer(Modifier.height(24.dp))
-
-            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
-                Row(Modifier.padding(20.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocalOffer, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(32.dp))
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text("Mix & Match Deal", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer)
-                        Text("Build your own pizza deal", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
-                    }
-                }
-            }
-
-            if (recentOrderCount > 0) {
-                Spacer(Modifier.height(16.dp))
-                Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-                    Row(Modifier.padding(20.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                        Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(28.dp))
+                BlooCard(containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.LocalOffer, null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(32.dp))
                         Spacer(Modifier.width(12.dp))
-                        Column {
-                            Text("Recent Orders", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                            Text("$recentOrderCount order${if (recentOrderCount > 1) "s" else ""} placed", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Spacer(Modifier.weight(1f))
-                        FilledTonalButton(onClick = onAccountClick, shape = MaterialTheme.shapes.large) { Text("View", fontWeight = FontWeight.Medium) }
+                        Column { Text("Mix & Match Deal", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer); Text("Build your own pizza deal", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)) }
                     }
+                }
+
+                if (recentOrderCount > 0) {
+                    BlooPebbleCard(icon = Icons.Default.History, iconTint = MaterialTheme.colorScheme.secondary, label = "Recent Orders", subtitle = "$recentOrderCount order${if (recentOrderCount > 1) "s" else ""}", onClick = onAccountClick, badge = "View")
                 }
             }
         }
