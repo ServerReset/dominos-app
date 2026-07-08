@@ -26,7 +26,7 @@ fun StoresScreen(stores: List<StoreInfo>, onStoreClick: (StoreInfo) -> Unit, onS
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 itemsIndexed(stores) { _, store ->
-                    BooCard(onClick = { onStoreClick(s) }) {
+                    BooCard(onClick = { onStoreClick(store) }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.LocationOn, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp)); Spacer(Modifier.width(8.dp))
                             Text(store.addressDescription ?: "Store #${store.storeID ?: ""}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
