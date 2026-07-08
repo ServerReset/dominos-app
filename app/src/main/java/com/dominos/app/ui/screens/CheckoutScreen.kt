@@ -73,7 +73,8 @@ fun CheckoutScreen(
                 }
             }
         } else {
-            Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.fillMaxSize().padding(padding).background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainerLow)))) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ExpressiveSectionCard("Service Method") {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         listOf("Delivery", "Carryout", "DriveUpCarryout").forEach { method ->
@@ -164,6 +165,7 @@ fun CheckoutScreen(
                     else Text("Place Order", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.height(16.dp))
+            }
             }
         }
     }
