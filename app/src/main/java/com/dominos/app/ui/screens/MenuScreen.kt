@@ -96,8 +96,11 @@ fun MenuScreen(
                                         FilterChip(selected = isSelected, onClick = { onCategorySelected(index) }, label = {
                                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                                 Text(category.name ?: "Category", maxLines = 1, fontSize = 13.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
-                                                Surface(shape = RoundedCornerShape(8.dp), color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.padding(start = 2.dp)) {
-                                                    Text("${category.products?.size ?: 0}", modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp), fontSize = 10.sp, fontWeight = FontWeight.Medium, color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant)
+                                                val prodCount = state.selectedCategoryProducts.size
+                                                if (isSelected && prodCount > 0) {
+                                                    Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f)) {
+                                                        Text("$prodCount", modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp), fontSize = 10.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                                    }
                                                 }
                                             }
                                         }, shape = MaterialTheme.shapes.large, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer, selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer))

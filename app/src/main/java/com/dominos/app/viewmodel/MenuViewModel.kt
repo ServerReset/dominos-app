@@ -107,18 +107,21 @@ class MenuViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun flattenCategories(menu: MenuResponse): List<CategoryNode> {
-        val result = mutableListOf<CategoryNode>()
+        val all = mutableListOf<CategoryNode>()
         fun dfs(nodes: List<CategoryNode>?) {
             if (nodes == null) return
             for (node in nodes) {
-                result.add(node)
-                if (!node.categories.isNullOrEmpty()) {
-                    dfs(node.categories)
-                }
+                all.add(node)
+                if (!node.categories.isNullOrEmpty()) dfs(node.categories)
             }
         }
         dfs(menu.categorization?.food?.categories)
-        return result
+        // Filter out categories that have no products at all (dead categories)
+        return all.filter { category ->
+            val codes = getAllProductCodes(category)
+            val products = menu.products ?: emptyMap()
+            codes.any { it in products }
+        }
     }
 
     private fun getCategoryProducts(menu: MenuResponse?, category: CategoryNode?, index: Int): List<MenuDisplayItem> {
