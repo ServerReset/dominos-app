@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,6 +71,7 @@ fun CartScreen(
             }
         }
     ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding).background(brush = Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainerLow)))) {
         Crossfade(targetState = items.isEmpty()) { empty ->
             if (empty) {
                 Column(Modifier.fillMaxSize().padding(padding).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -105,6 +107,7 @@ fun CartScreen(
                     }
                 }
             }
+        }
         }
     }
 }
