@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dominos.app.data.model.CartItem
 import com.dominos.app.navigation.Screen
+import com.dominos.app.ui.theme.SoftDamping
 import com.dominos.app.ui.components.BottomNavItem
 import com.dominos.app.ui.components.DominosBottomBar
 import com.dominos.app.ui.screens.*
@@ -107,10 +108,10 @@ fun DominosApp(
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(scaffoldPadding),
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeIn(animationSpec = tween(300)) },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeOut(animationSpec = tween(250)) },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeIn(animationSpec = tween(250)) },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeOut(animationSpec = tween(300)) }
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = spring(dampingRatio = SoftDamping, stiffness = 300f)) + fadeIn(animationSpec = tween(300)) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = spring(dampingRatio = SoftDamping, stiffness = 300f)) + fadeOut(animationSpec = tween(250)) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = spring(dampingRatio = SoftDamping, stiffness = 300f)) + fadeIn(animationSpec = tween(250)) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = spring(dampingRatio = SoftDamping, stiffness = 300f)) + fadeOut(animationSpec = tween(300)) }
         ) {
             composable(Screen.Splash.route) {
                 SplashScreen(onSplashFinished = {
