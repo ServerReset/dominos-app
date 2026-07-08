@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -105,10 +107,10 @@ fun DominosApp(
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(scaffoldPadding),
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut() },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn() },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeIn(animationSpec = tween(300)) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeOut(animationSpec = tween(250)) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeIn(animationSpec = tween(250)) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = spring(dampingRatio = 0.82f, stiffness = 300f)) + fadeOut(animationSpec = tween(300)) }
         ) {
             composable(Screen.Splash.route) {
                 SplashScreen(onSplashFinished = {
