@@ -1,25 +1,116 @@
 package com.dominos.app.ui.screens
 
-import androidx.compose.foundation.layout.*; import androidx.compose.foundation.lazy.LazyColumn; import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons; import androidx.compose.material.icons.automirrored.filled.ArrowBack; import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*; import androidx.compose.runtime.*; import androidx.compose.ui.Alignment; import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight; import androidx.compose.ui.unit.dp; import androidx.compose.ui.unit.sp
-import com.dominos.app.data.model.CartItem; import com.dominos.app.ui.components.DominosProductImage; import com.dominos.app.viewmodel.MenuDisplayItem
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.dominos.app.data.model.CartItem
+import com.dominos.app.ui.components.DominosProductImage
+import com.dominos.app.viewmodel.MenuDisplayItem
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun CustomizeProductScreen(storeId: String, item: MenuDisplayItem?, onAddToCart: (CartItem, String) -> Unit, onBack: () -> Unit, onToggleFavorite: (String, String) -> Unit = { _, _ -> }, isFavorite: (String) -> Boolean = { false }) {
+@Composable
+fun CustomizeProductScreen(
+    storeId: String, item: MenuDisplayItem?, onAddToCart: (CartItem, String) -> Unit,
+    onBack: () -> Unit, onToggleFavorite: (String, String) -> Unit = { _, _ -> },
+    isFavorite: (String) -> Boolean = { false }
+) {
     if (item == null) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Product not found") }; return }
-    var sz by remember { mutableStateOf(item.sizes.getOrNull(0)?.code ?: "") }; var fl by remember { mutableStateOf<String?>(null) }; var top by remember { mutableStateOf<Set<String>>(emptySet()) }; var qty by remember { mutableIntStateOf(1) }
+    var sz by remember { mutableStateOf(item.sizes.getOrNull(0)?.code ?: "") }
+    var fl by remember { mutableStateOf<String?>(null) }
+    var top by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var qty by remember { mutableIntStateOf(1) }
     val isPizza = item.productType == "Pizza" || item.productCode.contains("P") || item.sizes.size > 1
     val sv = item.variants.find { it.sizeCode == sz && (it.flavorCode == fl || it.flavorCode == null) }
-    val bp = sv?.price?.toDoubleOrNull() ?: item.price?.removePrefix("$")?.toDoubleOrNull() ?: 0.0; val total = bp * qty
-    Scaffold(topBar = { TopAppBar(title = { Text(item.productName, fontWeight = FontWeight.Bold) }, navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } }, actions = { IconButton(onClick = { onToggleFavorite(item.productCode, item.productName) }) { Icon(if (isFavorite(item.productCode)) Icons.Default.Favorite else Icons.Default.FavoriteBorder, null, tint = MaterialTheme.colorScheme.onSurface) } }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)) },
-        bottomBar = { Surface(tonalElevation = 4.dp, color = MaterialTheme.colorScheme.surface) { Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) { Row(verticalAlignment = Alignment.CenterVertically) { FilledIconButton(onClick = { if (qty > 1) qty-- }, modifier = Modifier.size(40.dp), shape = RoundedCornerShape(14.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) { Icon(Icons.Default.Remove, null) }; Text("$qty", modifier = Modifier.padding(horizontal = 16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp); FilledIconButton(onClick = { qty++ }, modifier = Modifier.size(40.dp), shape = RoundedCornerShape(14.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) { Icon(Icons.Default.Add, null) } }; Button(onClick = { val opts = mutableMapOf<String, Map<String, String>>(); if (isPizza && sz.isNotEmpty()) { opts["X"] = mapOf("1/1" to "1"); opts["C"] = mapOf("1/1" to sz.replace(Regex("[^0-9]"), "")) }; top.forEach { c -> opts[c] = mapOf("1/1" to "1") }; onAddToCart(CartItem(productCode = item.productCode, productName = item.productName, quantity = qty, price = "%.2f".format(total), options = opts.ifEmpty { null }, sizeCode = sz.ifEmpty { null }, flavorCode = fl, id = 0), storeId) }, shape = MaterialTheme.shapes.large) { Text("Add - \$" + "%.2f".format(total), fontWeight = FontWeight.Bold) } } } }) { padding ->
+    val bp = sv?.price?.toDoubleOrNull() ?: item.price?.removePrefix("$")?.toDoubleOrNull() ?: 0.0
+    val total = bp * qty
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(item.productName, fontWeight = FontWeight.Bold) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } },
+                actions = {
+                    IconButton(onClick = { onToggleFavorite(item.productCode, item.productName) }) {
+                        Icon(if (isFavorite(item.productCode)) Icons.Default.Favorite else Icons.Default.FavoriteBorder, null, tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
+            )
+        },
+        bottomBar = {
+            Surface(tonalElevation = 4.dp, color = MaterialTheme.colorScheme.surface) {
+                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        FilledIconButton(onClick = { if (qty > 1) qty-- }, modifier = Modifier.size(40.dp), shape = RoundedCornerShape(14.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) { Icon(Icons.Default.Remove, null) }
+                        Text("$qty", modifier = Modifier.padding(horizontal = 16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        FilledIconButton(onClick = { qty++ }, modifier = Modifier.size(40.dp), shape = RoundedCornerShape(14.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) { Icon(Icons.Default.Add, null) }
+                    }
+                    Button(onClick = {
+                        val opts = mutableMapOf<String, Map<String, String>>()
+                        if (isPizza && sz.isNotEmpty()) { opts["X"] = mapOf("1/1" to "1"); opts["C"] = mapOf("1/1" to sz.replace(Regex("[^0-9]"), "")) }
+                        top.forEach { c -> opts[c] = mapOf("1/1" to "1") }
+                        onAddToCart(CartItem(productCode = item.productCode, productName = item.productName, quantity = qty, price = "%.2f".format(total),
+                            options = opts.ifEmpty { null }, sizeCode = sz.ifEmpty { null }, flavorCode = fl, id = 0), storeId)
+                    }, shape = MaterialTheme.shapes.large) { Text("Add - \$" + "%.2f".format(total), fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
+    ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp), contentPadding = PaddingValues(vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { DominosProductImage(productCode = item.imageCode ?: item.productCode, modifier = Modifier.size(160.dp)) } }
-            if (isPizza && item.sizes.isNotEmpty()) { item { Text("Size", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(8.dp)); Column { item.sizes.forEach { s -> val sel = sz == s.code; val v = item.variants.find { it.sizeCode == s.code }; Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = if (sel) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface), border = if (sel) CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null) { Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = sel, onClick = { sz = s.code ?: "" }); Spacer(Modifier.width(12.dp)); Text(s.name ?: s.code ?: "", modifier = Modifier.weight(1f), fontWeight = if (sel) FontWeight.Bold else FontWeight.Normal); v?.price?.toDoubleOrNull()?.let { Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.primaryContainer) { Text("\$${"%.2f".format(it)}", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } } } } } } } }
-            if (item.flavors.isNotEmpty()) { item { Text("Crust", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(8.dp)); Column { item.flavors.forEach { f -> val sel = fl == f.code; Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = if (sel) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) { Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) { RadioButton(selected = sel, onClick = { fl = f.code }); Spacer(Modifier.width(12.dp)); Text(f.name ?: f.code ?: "", modifier = Modifier.weight(1f), fontWeight = if (sel) FontWeight.Bold else FontWeight.Normal); f.price?.toDoubleOrNull()?.let { if (it > 0) Text("+\$${"%.2f".format(it)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium) } } } } } } }
-            if (item.availableToppings.isNotEmpty()) { item { Text("Toppings", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(8.dp)); Column { item.availableToppings.take(20).forEach { t -> val c = t.code in top; Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = if (c) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) { Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Checkbox(checked = c, onCheckedChange = { checked -> top = if (checked) top + (t.code ?: "") else top - (t.code ?: "") }); Text(t.name ?: t.code ?: "", modifier = Modifier.weight(1f)); t.price?.toDoubleOrNull()?.let { if (it > 0) Text("+\$${"%.2f".format(it)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium) } } } } } } }
+            if (isPizza && item.sizes.isNotEmpty()) {
+                item { Text("Size", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(8.dp))
+                    Column { item.sizes.forEach { s -> val sel = sz == s.code; val v = item.variants.find { it.sizeCode == s.code }
+                        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = if (sel) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface),
+                            border = if (sel) CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null) {
+                            Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = sel, onClick = { sz = s.code ?: "" }); Spacer(Modifier.width(12.dp))
+                                Text(s.name ?: s.code ?: "", modifier = Modifier.weight(1f), fontWeight = if (sel) FontWeight.Bold else FontWeight.Normal)
+                                v?.price?.toDoubleOrNull()?.let { Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.primaryContainer) { Text("\$${"%.2f".format(it)}", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } }
+                            }
+                        }
+                    }}
+                }
+            }
+            if (item.flavors.isNotEmpty()) {
+                item { Text("Crust", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(8.dp))
+                    Column { item.flavors.forEach { f -> val sel = fl == f.code
+                        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = if (sel) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
+                            Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = sel, onClick = { fl = f.code }); Spacer(Modifier.width(12.dp))
+                                Text(f.name ?: f.code ?: "", modifier = Modifier.weight(1f), fontWeight = if (sel) FontWeight.Bold else FontWeight.Normal)
+                                f.price?.toDoubleOrNull()?.let { if (it > 0) Text("+\$${"%.2f".format(it)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium) }
+                            }
+                        }
+                    }}
+                }
+            }
+            if (item.availableToppings.isNotEmpty()) {
+                item { Text("Toppings", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary); Spacer(Modifier.height(8.dp))
+                    Column { item.availableToppings.take(20).forEach { t -> val c = t.code in top
+                        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = if (c) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
+                            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(checked = c, onCheckedChange = { checked -> top = if (checked) top + (t.code ?: "") else top - (t.code ?: "") })
+                                Text(t.name ?: t.code ?: "", modifier = Modifier.weight(1f))
+                                t.price?.toDoubleOrNull()?.let { if (it > 0) Text("+\$${"%.2f".format(it)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium) }
+                            }
+                        }
+                    }}
+                }
+            }
         }
     }
 }
