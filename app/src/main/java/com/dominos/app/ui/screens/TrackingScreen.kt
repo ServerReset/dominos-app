@@ -26,8 +26,18 @@ data class TrkStage(val name: String, val icon: @Composable () -> Unit, val comp
 
 @Composable
 fun TrackingScreen(orderId: String, onBack: () -> Unit, currentStage: Int = 0, isLoadingTracking: Boolean = false) {
-    val scheme = MaterialTheme.colorScheme; val stages = remember { listOf(TrkStage("Placed", { Icon(Icons.Default.Receipt, null) }, false, false), TrkStage("Preparing", { Icon(Icons.Default.Restaurant, null) }, false, false), TrkStage("Baking", { Icon(Icons.Default.LocalFireDepartment, null) }, false, false), TrkStage("Quality Check", { Icon(@Suppress("DEPRECATION") Icons.Default.FactCheck, null, tint = scheme.onPrimary) }, false, false), TrkStage("Delivery", { Icon(Icons.Default.DirectionsCar, null) }, false, false), TrkStage("Delivered", { Icon(Icons.Default.CheckCircle, null) }, false, false)) }
+    val scheme = MaterialTheme.colorScheme
     val pC = scheme.primary; val pOC = scheme.onPrimary; val sV = scheme.surfaceVariant; val oS = scheme.onSurface; val oSV = scheme.onSurfaceVariant
+    val stages = remember {
+        listOf(
+            TrkStage("Placed", { Icon(Icons.Default.Receipt, null) }, false, false),
+            TrkStage("Preparing", { Icon(Icons.Default.Restaurant, null) }, false, false),
+            TrkStage("Baking", { Icon(Icons.Default.LocalFireDepartment, null) }, false, false),
+            TrkStage("Quality Check", { Icon(@Suppress("DEPRECATION") Icons.Default.FactCheck, null, tint = pOC) }, false, false),
+            TrkStage("Delivery", { Icon(Icons.Default.DirectionsCar, null) }, false, false),
+            TrkStage("Delivered", { Icon(Icons.Default.CheckCircle, null) }, false, false)
+        )
+    }
     BooScreenScaffold(title = "Track Order", onBack = onBack) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Card(shape = MaterialTheme.shapes.extraLarge, elevation = CardDefaults.cardElevation(4.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
@@ -42,16 +52,25 @@ fun TrackingScreen(orderId: String, onBack: () -> Unit, currentStage: Int = 0, i
                         val ps by animateFloatAsState(if (active) 1.15f else 1f, if (active) infiniteRepeatable(tween(800, easing = FastOutSlowInEasing), RepeatMode.Reverse) else tween(300), label = "p")
                         Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Surface(Modifier.size(44.dp).scale(ps), shape = CircleShape, color = when { active -> pC; complete -> pC.copy(alpha = 0.6f); else -> sV }, tonalElevation = if (active) 4.dp else 0.dp) {
-                                Box(contentAlignment = Alignment.Center) { if (complete) Icon(Icons.Default.Check, null, tint = pOC, modifier = Modifier.size(22.dp)); else Text("${i + 1}", color = if (active) pOC else oSV, fontWeight = FontWeight.Bold, fontSize = 16.sp) }
+                                Box(contentAlignment = Alignment.Center) {
+                                    if (complete) Icon(Icons.Default.Check, null, tint = pOC, modifier = Modifier.size(22.dp))
+                                    else Text("${i + 1}", color = if (active) pOC else oSV, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                }
                             }
-                            Spacer(Modifier.width(16.dp)); Text(st.name, style = MaterialTheme.typography.bodyLarge, fontWeight = if (active) FontWeight.Bold else FontWeight.Normal, color = if (active) oS else oSV)
+                            Spacer(Modifier.width(16.dp))
+                            Text(st.name, style = MaterialTheme.typography.bodyLarge, fontWeight = if (active) FontWeight.Bold else FontWeight.Normal, color = if (active) oS else oSV)
                         }
                     }
                 }
             }
             if (currentStage >= stages.size - 1) {
                 Spacer(Modifier.height(24.dp))
-                Card(shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) { Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(28.dp)); Spacer(Modifier.width(12.dp)); Text("Delivered!", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer) } }
+                Card(shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
+                    Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.width(12.dp)); Text("Delivered!", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                    }
+                }
             }
         }
     }
